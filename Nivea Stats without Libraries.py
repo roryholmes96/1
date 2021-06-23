@@ -101,6 +101,7 @@ def cross_tabulate_means(variable_list1, variable_list2, variable_list3):
     return cross_tabulation_means
 
 def print_cross_tabulation(variable_list1, variable_list2, variable_list3):
+    '''Formats and prints cross-tabulation results'''
     cross_tabulation_frequencies = \
     cross_tabulate_frequencies(variable_list1, variable_list2)
 
@@ -153,12 +154,12 @@ get_frequencies(deoderant_use_list)
 print('\nAge Descriptives:')
 get_descriptives(age_list)
 
+print('\nAge Bin Frequencies:')
+print(f'age 0-10: {len(age_0_10)}\nage 11-20: {len(age_11_20)}\n'\
+f'age 21-30: {len(age_21_30)}\nage 31-40: {len(age_31_40)}\n'\
+f'age 41-50: {len(age_41_50)}\nage 51-60: {len(age_51_60)}\n' \
+f'age 61-70: {len(age_61_70)}\nage 71-80: {len(age_71_80)}')
+
 print('\nCross-Tabulation with Frequencies and Mean Age'\
 ' (Gender, Deoderant Use):')
 print_cross_tabulation(gender_list, deoderant_use_list, age_list)
-
-print('\nAge Bin Frequencies:')
-print(f'0-10: {len(age_0_10)}\n11-20: {len(age_11_20)}\n'\
-f'21-30: {len(age_21_30)}\n31-40: {len(age_31_40)}\n'\
-f'41-50: {len(age_41_50)}\n51-60: {len(age_51_60)}\n' \
-f'61-70: {len(age_61_70)}\n71-80: {len(age_71_80)}')
