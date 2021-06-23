@@ -154,10 +154,10 @@ print('\nAge Descriptives:')
 get_descriptives(age_list)
 
 print('\nCross-Tabulation with Frequencies and Mean Age'\
-'(Gender, Deoderant Use)')
+' (Gender, Deoderant Use):')
 print_cross_tabulation(gender_list, deoderant_use_list, age_list)
 
-print('\nAge Bin Frequencies')
+print('\nAge Bin Frequencies:')
 print(f'0-10: {len(age_0_10)}\n11-20: {len(age_11_20)}\n'\
 f'21-30: {len(age_21_30)}\n31-40: {len(age_31_40)}\n'\
 f'41-50: {len(age_41_50)}\n51-60: {len(age_51_60)}\n' \
