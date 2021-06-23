@@ -1,138 +1,165 @@
-file = open(r'C:\Users\44797\Downloads\4943-21 Nivea Adcepts Brazil0_21060704.csv')
+filename = \
+r'C:\Users\44797\Downloads\4943-21 Nivea Adcepts Brazil0_21060704.csv'
 
 #Creates lists for each column
-ageList=[]
-genderList=[]
-deoderantList=[]
+serial_list = []
+gender_list = []
+age_list = []
+deoderant_use_list = []
 
 #Splits data in csv rows by ',' and appends each column to respective list
-for row in file:
-    ageList.append(row.split(',')[2])
-    genderList.append(row.split(',')[1])
-    deoderantList.append(row.split(',')[3])
+with open(filename) as f:
+    for row in f:
+        serial_list.append(row.split(',')[0])
+        gender_list.append(row.split(',')[1])
+        age_list.append(row.split(',')[2])
+        deoderant_use_list.append(row.split(',')[3])
 
 #Removes '\n' from deoderant list
-deoderantList = [i.strip('\n') for i in deoderantList]
+deoderant_use_list = [i.rstrip() for i in deoderant_use_list]
 
 #Removes column headers from lists
-deoderantList.remove('Qs3')
-genderList.remove('Qs0')
-ageList.remove('Qs1_1')
+serial_list.remove('ï»¿HWSerial')
+gender_list.remove('Qs0')
+age_list.remove('Qs1_1')
+deoderant_use_list.remove('Qs3')
 
 #Converts list items from strings to ints
-for string in range(0, len(deoderantList)):
-    deoderantList[string] = int(deoderantList[string])
+for string in range(0, len(deoderant_use_list)):
+    deoderant_use_list[string] = int(deoderant_use_list[string])
 
-for string in range(0, len(genderList)):
-    genderList[string] = int(genderList[string])
+for string in range(0, len(gender_list)):
+    gender_list[string] = int(gender_list[string])
 
-for string in range(0, len(ageList)):
-    ageList[string] = int(ageList[string])
+for string in range(0, len(age_list)):
+    age_list[string] = int(age_list[string])
+
+#Defines functions to perform various statistical analyses
+def get_frequencies(variable_list):
+    '''Calculates frequencies for variable'''
+    variable_frequencies = {}
+    for variable in variable_list:
+        if variable in variable_frequencies.keys():
+            variable_frequencies[variable] +=1
+        else:
+            variable_frequencies[variable] = 1
+    for k, v in sorted(variable_frequencies.items()):
+        print(f'{k}: {v}')
+
+def mean(variable_list):
+    '''Calculates mean of a variable'''
+    mean = sum(variable_list)/len(variable_list)
+    return mean
+
+def standard_deviation(variable_list):
+    '''Calculates standard deviation of a variable'''
+    deviations =  [(variable - mean(variable_list)) ** 2 for variable in variable_list]
+    variance = (sum(deviations)/(len(deviations)))
+    standard_deviation = variance** (1/2)
+    return(standard_deviation)
+
+def get_descriptives(variable_list):
+    '''Gets descriptive statistics for variable'''
+    print(min(variable_list))
+    print(max(variable_list))
+    print(mean(variable_list))
+    print(standard_deviation(variable_list))
+
+def cross_tabulate_frequencies(variable_list1, variable_list2):
+    '''Cross-tabulates 2 variables and returns frequencies'''
+    cross_tabulation_variables = list(zip(variable_list1, variable_list2))
+    cross_tabulation_frequencies = {}
+    for t in cross_tabulation_variables:
+        if t in cross_tabulation_frequencies.keys():
+            cross_tabulation_frequencies[t] +=1
+        else:
+            cross_tabulation_frequencies[t] =1
+    return(cross_tabulation_frequencies)
+
+def cross_tabulate_means(variable_list1, variable_list2, variable_list3):
+    '''Cross-tabulates 2 variables and returns means of 3rd variable'''
+    cross_tabulation_frequencies = \
+    cross_tabulate_frequencies(variable_list1, variable_list2)
     
-#Calculates frequencies for Gender and Deoderant Use
-genderFrequency = {}
-for gender in genderList:
-    if gender in genderFrequency.keys():
-        genderFrequency[gender] += 1
-    else:
-        genderFrequency[gender] = 1
+    cross_tabulation_variables = \
+    list(zip(variable_list1, variable_list2, variable_list3))
+    cross_tabulation_sums = {}
+    
+    for x, y, z in cross_tabulation_variables:
+        if (x,y) in cross_tabulation_sums.keys():
+            cross_tabulation_sums[(x,y)] += z
+        else:
+            cross_tabulation_sums[(x,y)] = z
 
-deoderantFrequency = {}
-for deoderant in deoderantList:
-    if deoderant in deoderantFrequency.keys():
-        deoderantFrequency[deoderant] += 1
-    else:
-        deoderantFrequency[deoderant] = 1
+    frequency_sum_list = list\
+    (zip(cross_tabulation_sums.values(),cross_tabulation_frequencies.values()))
 
-print('Deoderant Use Frequencies')
-print(deoderantFrequency)
-print('')
-print('Gender Frequencies')
-print(genderFrequency)
-print('')
+    cross_tabulation_means = []
+    for x,y in frequency_sum_list:
+        cross_tabulation_means.append(x/y)
 
-#Calculates descritptive statistics for Age
-minAge = min(ageList)
-maxAge = max(ageList)
-meanAge = (sum(ageList)/len(ageList))
-deviationsAge = [(x - meanAge) ** 2 for x in ageList]
-varianceAge = (sum(deviationsAge)/(len(deviationsAge)))
-sdAge = varianceAge ** (1/2)
+    return cross_tabulation_means
 
-print('Age Descriptive Statistics')
-print('Min Age: ' + str(minAge))
-print('Max Age: ' + str(maxAge))
-print('Mean Age: ' + str(meanAge))
-print('Standard Deviation: ' + str(sdAge))
-print('')
+def print_cross_tabulation(variable_list1, variable_list2, variable_list3):
+    cross_tabulation_frequencies = \
+    cross_tabulate_frequencies(variable_list1, variable_list2)
 
+    cross_tabulation_means = \
+    cross_tabulate_means (variable_list1, variable_list2, variable_list3)
 
-#Cross-Tabulation (creates touples for each gn, dn and calculates
-#frequencies of tuples i.e. cross-tabulation
-gxd = list(zip(genderList, deoderantList)) 
-gxdFrequency = {}
-for touple in gxd:
-    if touple in gxdFrequency.keys():
-        gxdFrequency[touple] += 1
-    else:
-        gxdFrequency[touple] = 1
+    full_cross_tabulation = list(zip(cross_tabulation_frequencies.keys(),\
+    cross_tabulation_frequencies.values(),\
+    cross_tabulation_means))
 
-print('Cross-Tabulation Frequencies for Gender, Deoderant Use')
-print(gxdFrequency)
-print('')
+    for x,y,z in sorted(full_cross_tabulation): 
+        print(f'{x}: frequency = {y}, mean age = {z}')
 
-#Cross-Tabulation with mean age (creates a 3-tuple for each gn, dn and an
-#and then creates lists of an for each gn, dn then calculates mean of these
-#age lists
-gxdxa = list(zip(genderList, deoderantList, ageList))
-g1xd1Age = [z for x, y, z in gxdxa if x == 1 and y == 1]
-g1xd2Age = [z for x, y, z in gxdxa if x == 1 and y == 2]
-g1xd3Age = [z for x, y, z in gxdxa if x == 1 and y == 3]
-g1xd4Age = [z for x, y, z in gxdxa if x == 1 and y == 4]
-g2xd1Age = [z for x, y, z in gxdxa if x == 2 and y == 1]
-g2xd2Age = [z for x, y, z in gxdxa if x == 2 and y == 2]
-g2xd3Age = [z for x, y, z in gxdxa if x == 2 and y == 3]
-g2xd4Age = [z for x, y, z in gxdxa if x == 2 and y == 4]
-g3xd1Age = [z for x, y, z in gxdxa if x == 3 and y == 1]
-g3xd2Age = [z for x, y, z in gxdxa if x == 3 and y == 2]
-g3xd3Age = [z for x, y, z in gxdxa if x == 3 and y == 3]
-g3xd4Age = [z for x, y, z in gxdxa if x == 3 and y == 4]
-g4xd1Age = [z for x, y, z in gxdxa if x == 4 and y == 1]
-g4xd2Age = [z for x, y, z in gxdxa if x == 4 and y == 2]
-g4xd3Age = [z for x, y, z in gxdxa if x == 4 and y == 3]
-g4xd4Age = [z for x, y, z in gxdxa if x == 4 and y == 4]
+#Creates age bins:
+age_0_10 = []
+age_11_20 = []
+age_21_30 = []
+age_31_40 = []
+age_41_50 = []
+age_51_60 = []
+age_61_70 = []
+age_71_80 = []
+age_81_90 = []
 
-g1xd1AgeMean = (sum(g1xd1Age)/len(g1xd1Age))
-g1xd2AgeMean = (sum(g1xd2Age)/len(g1xd2Age))
-g1xd3AgeMean = (sum(g1xd3Age)/len(g1xd3Age))
-g1xd4AgeMean = (sum(g1xd4Age)/len(g1xd4Age))
-g2xd1AgeMean = (sum(g2xd1Age)/len(g2xd1Age))
-g2xd2AgeMean = (sum(g2xd2Age)/len(g2xd2Age))
-g2xd3AgeMean = (sum(g2xd3Age)/len(g2xd3Age))
-g2xd4AgeMean = (sum(g2xd4Age)/len(g2xd4Age))
-##g3xd1AgeMean = (sum(g3xd1Age)/len(g3xd1Age))
-g3xd2AgeMean = (sum(g3xd2Age)/len(g3xd2Age))
-g3xd3AgeMean = (sum(g3xd3Age)/len(g3xd3Age))
-##g3xd4AgeMean = (sum(g3xd4Age)/len(g3xd4Age))
-g4xd1AgeMean = (sum(g4xd1Age)/len(g4xd1Age))
-##g4xd2AgeMean = (sum(g4xd2Age)/len(g4xd2Age))
-##g4xd3AgeMean = (sum(g4xd3Age)/len(g4xd3Age))
-##g4xd4AgeMean = (sum(g4xd4Age)/len(g4xd4Age))
+for i in age_list:
+    if i < 11:
+        age_0_10.append(i)
+    elif i < 21:
+        age_11_20.append(i)
+    elif i < 31:
+        age_21_30.append(i)
+    elif i < 41:
+        age_31_40.append(i)
+    elif i < 51:
+        age_41_50.append(i)
+    elif i < 61:
+        age_51_60.append(i)
+    elif i < 71:
+        age_61_70.append(i)
+    elif i < 81:
+        age_71_80.append(i)
 
-print('Cross-Tabulation Mean Ages for Gender, Deoderant Use')
-print('(1,1): ' + str(g1xd1AgeMean))
-print('(1,2): ' + str(g1xd2AgeMean))
-print('(1,3): ' + str(g1xd3AgeMean))
-print('(1,4): ' + str(g1xd4AgeMean))
-print('(2,1): ' + str(g2xd1AgeMean))
-print('(2,2): ' + str(g2xd2AgeMean))
-print('(2,3): ' + str(g2xd3AgeMean))
-print('(2,4): ' + str(g2xd4AgeMean))
-##print('(3,1): ' + str(g3xd1AgeMean))
-print('(3,2): ' + str(g3xd2AgeMean))
-print('(3,3): ' + str(g3xd3AgeMean))
-##print('(3,4): ' + str(g3xd4AgeMean))
-print('(4,1): ' + str(g4xd1AgeMean))
-##print('(4,2): ' + str(g4xd2AgeMean))
-##print('(4,3): ' + str(g4xd3AgeMean))
-##print('(4,4): ' + str(g4xd4AgeMean))
+    
+#Performs analyses on data and prints results
+print('Gender Frequencies:')
+get_frequencies(gender_list)
+
+print('\nDeoderant Use Frequencies:')
+get_frequencies(deoderant_use_list)
+
+print('\nAge Descriptives:')
+get_descriptives(age_list)
+
+print('\nCross-Tabulation with Frequencies and Mean Age'\
+'(Gender, Deoderant Use)')
+print_cross_tabulation(gender_list, deoderant_use_list, age_list)
+
+print('\nAge Bin Frequencies')
+print(f'0-10: {len(age_0_10)}\n11-20: {len(age_11_20)}\n'\
+f'21-30: {len(age_21_30)}\n31-40: {len(age_31_40)}\n'\
+f'41-50: {len(age_41_50)}\n51-60: {len(age_51_60)}\n' \
+f'61-70: {len(age_61_70)}\n71-80: {len(age_71_80)}')
