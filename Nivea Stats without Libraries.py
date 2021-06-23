@@ -60,10 +60,10 @@ def standard_deviation(variable_list):
 
 def get_descriptives(variable_list):
     '''Gets descriptive statistics for variable'''
-    print(min(variable_list))
-    print(max(variable_list))
-    print(mean(variable_list))
-    print(standard_deviation(variable_list))
+    print(f'min: {min(variable_list)}')
+    print(f'max: {max(variable_list)}')
+    print(f'mean: {mean(variable_list)}')
+    print(f'standard deviation: {standard_deviation(variable_list)}')
 
 def cross_tabulate_frequencies(variable_list1, variable_list2):
     '''Cross-tabulates 2 variables and returns frequencies'''
@@ -142,8 +142,7 @@ for i in age_list:
         age_61_70.append(i)
     elif i < 81:
         age_71_80.append(i)
-
-    
+ 
 #Performs analyses on data and prints results
 print('Gender Frequencies:')
 get_frequencies(gender_list)
