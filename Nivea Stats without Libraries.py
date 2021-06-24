@@ -3,29 +3,29 @@ r'C:\Users\44797\Downloads\4943-21 Nivea Adcepts Brazil0_21060704.csv'
 
 #Defines functions to perform various statistical analyses
 def calculateFrequencies(responses):
-    '''Calculates frequencies for variable'''
+    '''Calculates frequencies for response'''
     frequencies = {}
-    for variable in responses:
-        if variable in frequencies.keys():
-            frequencies[variable] +=1
+    for response in responses:
+        if response in frequencies.keys():
+            frequencies[response] +=1
         else:
-            frequencies[variable] = 1
+            frequencies[response] = 1
     return frequencies
 
 def mean(responses):
-    '''Calculates mean of a variable'''
+    '''Calculates mean of a response'''
     return sum(responses)/len(responses)
    
 def standardDeviation(responses):
-    '''Calculates standard deviation of a variable'''
+    '''Calculates standard deviation of a response'''
     deviations =\
-    [(variable - mean(responses)) ** 2 for variable in responses]
+    [(response - mean(responses)) ** 2 for response in responses]
     variance = (sum(deviations)/(len(deviations)))
     standardDeviation = variance** (1/2)
     return standardDeviation
 
 def crossTabulateFrequencies(responses1, responses2):
-    '''Cross-tabulates 2 variables and returns frequencies'''
+    '''Cross-tabulates 2 responses and returns frequencies'''
     crossTabulationResponses = list(zip(responses1, responses2))
     crossTabulationFrequencies = {}
     for t in crossTabulationResponses:
@@ -36,7 +36,7 @@ def crossTabulateFrequencies(responses1, responses2):
     return(crossTabulationFrequencies)
 
 def crossTabulateMeans(responses1, responses2, responses3):
-    '''Cross-tabulates 2 variables and returns means of 3rd variable'''
+    '''Cross-tabulates 2 responses and returns means of 3rd response'''
     crossTabulationFrequencies = \
     crossTabulateFrequencies(responses1, responses2)
     
@@ -60,13 +60,13 @@ def crossTabulateMeans(responses1, responses2, responses3):
     return crossTabulationMeans
 
 def printFrequencies(responses):
-    '''Prints frequencies for variable'''
+    '''Prints frequencies for response'''
     frequencies = calculateFrequencies(responses)
     for k, v in sorted(frequencies.items()):
         print(f'{k}: {v}')
 
 def printDescriptives(responses):
-    '''Gets descriptive statistics for variable'''
+    '''Gets descriptive statistics for response'''
     print(f'min: {min(responses)}')
     print(f'max: {max(responses)}')
     print(f'mean: {mean(responses)}')
