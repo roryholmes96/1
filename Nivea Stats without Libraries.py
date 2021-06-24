@@ -1,153 +1,141 @@
 filename = \
 r'C:\Users\44797\Downloads\4943-21 Nivea Adcepts Brazil0_21060704.csv'
 
-#Creates lists for each column
-serial_list = []
-gender_list = []
-age_list = []
-deoderant_use_list = []
-
-#Splits data in csv rows by ',' and appends each column to respective list
-with open(filename) as f:
-    for row in f:
-        serial_list.append(row.split(',')[0])
-        gender_list.append(row.split(',')[1])
-        age_list.append(row.split(',')[2])
-        deoderant_use_list.append(row.split(',')[3])
-
-#Removes '\n' from deoderant list
-deoderant_use_list = [i.rstrip() for i in deoderant_use_list]
-
-#Removes column headers from lists
-serial_list.remove('ï»¿HWSerial')
-gender_list.remove('Qs0')
-age_list.remove('Qs1_1')
-deoderant_use_list.remove('Qs3')
-
-#Converts list items from strings to ints
-for string in range(0, len(deoderant_use_list)):
-    deoderant_use_list[string] = int(deoderant_use_list[string])
-
-for string in range(0, len(gender_list)):
-    gender_list[string] = int(gender_list[string])
-
-for string in range(0, len(age_list)):
-    age_list[string] = int(age_list[string])
-
 #Defines functions to perform various statistical analyses
-def get_frequencies(variable_list):
+def calculateFrequencies(responses):
     '''Calculates frequencies for variable'''
-    variable_frequencies = {}
-    for variable in variable_list:
-        if variable in variable_frequencies.keys():
-            variable_frequencies[variable] +=1
+    frequencies = {}
+    for variable in responses:
+        if variable in frequencies.keys():
+            frequencies[variable] +=1
         else:
-            variable_frequencies[variable] = 1
-    for k, v in sorted(variable_frequencies.items()):
-        print(f'{k}: {v}')
+            frequencies[variable] = 1
+    return frequencies
 
-def mean(variable_list):
+def mean(responses):
     '''Calculates mean of a variable'''
-    mean = sum(variable_list)/len(variable_list)
-    return mean
-
-def standard_deviation(variable_list):
+    return sum(responses)/len(responses)
+   
+def standardDeviation(responses):
     '''Calculates standard deviation of a variable'''
     deviations =\
-    [(variable - mean(variable_list)) ** 2 for variable in variable_list]
+    [(variable - mean(responses)) ** 2 for variable in responses]
     variance = (sum(deviations)/(len(deviations)))
-    standard_deviation = variance** (1/2)
-    return(standard_deviation)
+    standardDeviation = variance** (1/2)
+    return standardDeviation
 
-def get_descriptives(variable_list):
-    '''Gets descriptive statistics for variable'''
-    print(f'min: {min(variable_list)}')
-    print(f'max: {max(variable_list)}')
-    print(f'mean: {mean(variable_list)}')
-    print(f'standard deviation: {standard_deviation(variable_list)}')
-
-def cross_tabulate_frequencies(variable_list1, variable_list2):
+def crossTabulateFrequencies(responses1, responses2):
     '''Cross-tabulates 2 variables and returns frequencies'''
-    cross_tabulation_variables = list(zip(variable_list1, variable_list2))
-    cross_tabulation_frequencies = {}
-    for t in cross_tabulation_variables:
-        if t in cross_tabulation_frequencies.keys():
-            cross_tabulation_frequencies[t] +=1
+    crossTabulationResponses = list(zip(responses1, responses2))
+    crossTabulationFrequencies = {}
+    for t in crossTabulationResponses:
+        if t in crossTabulationFrequencies.keys():
+            crossTabulationFrequencies[t] +=1
         else:
-            cross_tabulation_frequencies[t] =1
-    return(cross_tabulation_frequencies)
+            crossTabulationFrequencies[t] =1
+    return(crossTabulationFrequencies)
 
-def cross_tabulate_means(variable_list1, variable_list2, variable_list3):
+def crossTabulateMeans(responses1, responses2, responses3):
     '''Cross-tabulates 2 variables and returns means of 3rd variable'''
-    cross_tabulation_frequencies = \
-    cross_tabulate_frequencies(variable_list1, variable_list2)
+    crossTabulationFrequencies = \
+    crossTabulateFrequencies(responses1, responses2)
     
-    cross_tabulation_variables = \
-    list(zip(variable_list1, variable_list2, variable_list3))
-    cross_tabulation_sums = {}
+    crossTabulationResponses = \
+    list(zip(responses1, responses2, responses3))
+    crossTabulationSums = {}
     
-    for x, y, z in cross_tabulation_variables:
-        if (x,y) in cross_tabulation_sums.keys():
-            cross_tabulation_sums[(x,y)] += z
+    for x, y, z in crossTabulationResponses:
+        if (x, y) in crossTabulationSums.keys():
+            crossTabulationSums[(x,y)] += z
         else:
-            cross_tabulation_sums[(x,y)] = z
+            crossTabulationSums[(x,y)] = z
 
-    frequency_sum_list = list\
-    (zip(cross_tabulation_sums.values(),cross_tabulation_frequencies.values()))
+    frequencySums = list\
+    (zip(crossTabulationSums.values(),crossTabulationFrequencies.values()))
 
-    cross_tabulation_means = []
-    for x,y in frequency_sum_list:
-        cross_tabulation_means.append(x/y)
+    crossTabulationMeans = []
+    for x,y in frequencySums:
+        crossTabulationMeans.append(x/y)
 
-    return cross_tabulation_means
+    return crossTabulationMeans
 
-def print_cross_tabulation(variable_list1, variable_list2, variable_list3):
+def printFrequencies(responses):
+    '''Prints frequencies for variable'''
+    frequencies = calculateFrequencies(responses)
+    for k, v in sorted(frequencies.items()):
+        print(f'{k}: {v}')
+
+def printDescriptives(responses):
+    '''Gets descriptive statistics for variable'''
+    print(f'min: {min(responses)}')
+    print(f'max: {max(responses)}')
+    print(f'mean: {mean(responses)}')
+    print(f'standard deviation: {standardDeviation(responses)}')
+
+def printCrossTabulations(responses1, responses2, responses3):
     '''Formats and prints cross-tabulation results'''
-    cross_tabulation_frequencies = \
-    cross_tabulate_frequencies(variable_list1, variable_list2)
+    crossTabulationFrequencies = \
+    crossTabulateFrequencies(responses1, responses2)
 
-    cross_tabulation_means = \
-    cross_tabulate_means (variable_list1, variable_list2, variable_list3)
+    crossTabulationMeans = \
+    crossTabulateMeans (responses1, responses2, responses3)
 
-    full_cross_tabulation = list(zip(cross_tabulation_frequencies.keys(),\
-    cross_tabulation_frequencies.values(),\
-    cross_tabulation_means))
+    fullCrossTabulation = list(zip(crossTabulationFrequencies.keys(),\
+    crossTabulationFrequencies.values(),\
+    crossTabulationMeans))
 
-    for x,y,z in sorted(full_cross_tabulation): 
+    for x,y,z in sorted(fullCrossTabulation): 
         print(f'{x}: frequency = {y}, mean age = {z}')
 
-age_bin_list = []
-for i in range(len(age_list)):
-    if age_list[i] < 11:
-        age_bin_list.append('age_0_10')
-    elif age_list[i] < 21:
-        age_bin_list.append('age_11_20')
-    elif age_list[i] < 31:
-        age_bin_list.append('age_21_30')    
-    elif age_list[i] < 41:
-        age_bin_list.append('age_31_40')
-    elif age_list[i] < 51:
-        age_bin_list.append('age_41_50')
-    elif age_list[i] < 61:
-        age_bin_list.append('age_51_60')
-    elif age_list[i] < 71:
-        age_bin_list.append('age_61_70')
-    elif age_list[i] < 81:
-        age_bin_list.append('age_71_80')
+#Creates lists for each data column (and extra list for age bins)
+serials = []
+genders = []
+ages = []
+ageBins = []
+deoderantUses = []
+
+#Splits data in csv rows and appends each column to respective list
+with open(filename) as f:
+    next(f)
+    for row in f:
+        x = row.strip().split(',')
+        serials.append(x[0])
+        genders.append(x[1])
+        ages.append(int(x[2]))
+        deoderantUses.append(x[3])
+
+#Categorises ages into age bins and appends these to age bins list
+for i in range(len(ages)):
+    if ages[i] < 11:
+        ageBins.append('age_0_10')
+    elif ages[i] < 21:
+        ageBins.append('age_11_20')
+    elif ages[i] < 31:
+        ageBins.append('age_21_30')    
+    elif ages[i] < 41:
+        ageBins.append('age_31_40')
+    elif ages[i] < 51:
+        ageBins.append('age_41_50')
+    elif ages[i] < 61:
+        ageBins.append('age_51_60')
+    elif ages[i] < 71:
+        ageBins.append('age_61_70')
+    elif ages[i] < 81:
+        ageBins.append('age_71_80')
 
 #Performs analyses on data and prints results
 print('Gender Frequencies:')
-get_frequencies(gender_list)
+printFrequencies(genders)
 
 print('\nDeoderant Use Frequencies:')
-get_frequencies(deoderant_use_list)
+printFrequencies(deoderantUses)
 
 print('\nAge Descriptives:')
-get_descriptives(age_list)
+printDescriptives(ages)
 
 print('\nAge Bin Frequencies:')
-get_frequencies(age_bin_list) 
+printFrequencies(ageBins) 
 
 print('\nCross-Tabulation with Frequencies and Mean Age'\
 ' (Gender, Deoderant Use):')
-print_cross_tabulation(gender_list, deoderant_use_list, age_list)
+printCrossTabulations(genders, deoderantUses, ages)
