@@ -115,35 +115,25 @@ def print_cross_tabulation(variable_list1, variable_list2, variable_list3):
     for x,y,z in sorted(full_cross_tabulation): 
         print(f'{x}: frequency = {y}, mean age = {z}')
 
-#Creates age bins:
-age_0_10 = []
-age_11_20 = []
-age_21_30 = []
-age_31_40 = []
-age_41_50 = []
-age_51_60 = []
-age_61_70 = []
-age_71_80 = []
-age_81_90 = []
+age_bin_list = []
+for i in range(len(age_list)):
+    if age_list[i] < 11:
+        age_bin_list.append('age_0_10')
+    elif age_list[i] < 21:
+        age_bin_list.append('age_11_20')
+    elif age_list[i] < 31:
+        age_bin_list.append('age_21_30')    
+    elif age_list[i] < 41:
+        age_bin_list.append('age_31_40')
+    elif age_list[i] < 51:
+        age_bin_list.append('age_41_50')
+    elif age_list[i] < 61:
+        age_bin_list.append('age_51_60')
+    elif age_list[i] < 71:
+        age_bin_list.append('age_61_70')
+    elif age_list[i] < 81:
+        age_bin_list.append('age_71_80')
 
-for i in age_list:
-    if i < 11:
-        age_0_10.append(i)
-    elif i < 21:
-        age_11_20.append(i)
-    elif i < 31:
-        age_21_30.append(i)
-    elif i < 41:
-        age_31_40.append(i)
-    elif i < 51:
-        age_41_50.append(i)
-    elif i < 61:
-        age_51_60.append(i)
-    elif i < 71:
-        age_61_70.append(i)
-    elif i < 81:
-        age_71_80.append(i)
- 
 #Performs analyses on data and prints results
 print('Gender Frequencies:')
 get_frequencies(gender_list)
@@ -155,10 +145,7 @@ print('\nAge Descriptives:')
 get_descriptives(age_list)
 
 print('\nAge Bin Frequencies:')
-print(f'age 0-10: {len(age_0_10)}\nage 11-20: {len(age_11_20)}\n'\
-f'age 21-30: {len(age_21_30)}\nage 31-40: {len(age_31_40)}\n'\
-f'age 41-50: {len(age_41_50)}\nage 51-60: {len(age_51_60)}\n' \
-f'age 61-70: {len(age_61_70)}\nage 71-80: {len(age_71_80)}')
+get_frequencies(age_bin_list) 
 
 print('\nCross-Tabulation with Frequencies and Mean Age'\
 ' (Gender, Deoderant Use):')
