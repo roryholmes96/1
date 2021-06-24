@@ -53,7 +53,8 @@ def mean(variable_list):
 
 def standard_deviation(variable_list):
     '''Calculates standard deviation of a variable'''
-    deviations =  [(variable - mean(variable_list)) ** 2 for variable in variable_list]
+    deviations =\
+    [(variable - mean(variable_list)) ** 2 for variable in variable_list]
     variance = (sum(deviations)/(len(deviations)))
     standard_deviation = variance** (1/2)
     return(standard_deviation)
