@@ -92,7 +92,7 @@ serials = []
 genders = []
 ages = []
 ageBins = []
-deoderantUses = []
+deodorantUses = []
 
 #Splits data in csv rows and appends each column to respective list
 with open(filename) as f:
@@ -102,7 +102,7 @@ with open(filename) as f:
         serials.append(x[0])
         genders.append(x[1])
         ages.append(int(x[2]))
-        deoderantUses.append(x[3])
+        deodorantUses.append(x[3])
 
 #Categorises ages into age bins and appends these to age bins list
 for i in range(len(ages)):
@@ -127,8 +127,8 @@ for i in range(len(ages)):
 print('Gender Frequencies:')
 printFrequencies(genders)
 
-print('\nDeoderant Use Frequencies:')
-printFrequencies(deoderantUses)
+print('\ndeodorant Use Frequencies:')
+printFrequencies(deodorantUses)
 
 print('\nAge Descriptives:')
 printDescriptives(ages)
@@ -137,5 +137,5 @@ print('\nAge Bin Frequencies:')
 printFrequencies(ageBins) 
 
 print('\nCross-Tabulation with Frequencies and Mean Age'\
-' (Gender, Deoderant Use):')
-printCrossTabulations(genders, deoderantUses, ages)
+' (Gender, deodorant Use):')
+printCrossTabulations(genders, deodorantUses, ages)
