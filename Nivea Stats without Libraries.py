@@ -1,7 +1,5 @@
-filename = \
-r'C:\Users\44797\Downloads\4943-21 Nivea Adcepts Brazil0_21060704.csv'
-
-#Defines functions to perform various statistical analyses
+filename = r'C:\Users\44797\Downloads\weighted.csv'
+ 
 def calculateFrequencies(responses):
     '''Calculates frequencies for response'''
     frequencies = {}
@@ -12,17 +10,48 @@ def calculateFrequencies(responses):
             frequencies[response] = 1
     return frequencies
 
+def calculateWeightedFrequencies(responses):
+    '''Calculates weighted frequencies for response'''
+    weightedFrequencies = {}
+    for x, y in list(zip(weights, responses)):
+        if y in weightedFrequencies.keys():
+            weightedFrequencies[y] += x
+        else:
+            weightedFrequencies[y] = x
+    return weightedFrequencies
+
 def mean(responses):
-    '''Calculates mean of a response'''
+    '''Calculates mean of responses in a list'''
     return sum(responses)/len(responses)
+
+def weightedResponses(responses):
+    '''Calculates weighted mean of responses in a list'''
+    weightedResponses = []
+    for x, y in list(zip(weights, responses)):
+        weightedResponses.append(x*y)
+    return weightedResponses
+
+def weightedMean(responses):
+    '''Calculates weighted mean of responses in a list'''
+    return sum(weightedResponses(responses))/sum(weights)
+
+def sqrt(x):
+    '''Calculates square root of a value'''
+    return x ** (1/2)
    
 def standardDeviation(responses):
-    '''Calculates standard deviation of a response'''
+    '''Calculates standard deviation of responses in a list'''
     deviations =\
     [(response - mean(responses)) ** 2 for response in responses]
     variance = (sum(deviations)/(len(deviations)))
-    standardDeviation = variance** (1/2)
-    return standardDeviation
+    return sqrt(variance)
+
+def weightedStandardDeviation(responses):
+    '''Calculates standard deviation of responses in a list'''
+    a = list(zip(weights, responses))
+    deviations = [x*(y - weightedMean(responses))**2 for x, y in a]
+    variance = (sum(deviations)/(sum(weights)))
+    return sqrt(variance)
 
 def crossTabulateFrequencies(responses1, responses2):
     '''Cross-tabulates 2 responses and returns frequencies'''
@@ -47,11 +76,11 @@ def crossTabulateMeans(responses1, responses2, responses3):
     frequencySums = list\
     (zip(crossTabulationSums.values(),crossTabulationFrequencies.values()))
 
-    crossTabulationMeans = []
+    means = []
     for x,y in frequencySums:
-        crossTabulationMeans.append(x/y)
+        means.append(x/y)
 
-    return crossTabulationMeans
+    return dict(zip(means, list(zip(responses1, responses2))))
 
 def printFrequencies(responses):
     '''Prints frequencies for response'''
@@ -59,12 +88,25 @@ def printFrequencies(responses):
     for k, v in sorted(frequencies.items()):
         print(f'{k}: {v}')
 
+def printWeightedFrequencies(responses):
+    weightedFrequencies = calculateWeightedFrequencies(responses)
+    for k, v in sorted(weightedFrequencies.items()):
+        print(f'{k}: {v}')
+
 def printDescriptives(responses):
-    '''Gets descriptive statistics for response'''
+    '''Gets descriptive statistics for responses'''
     print(f'min: {min(responses)}')
     print(f'max: {max(responses)}')
     print(f'mean: {mean(responses)}')
     print(f'standard deviation: {standardDeviation(responses)}')
+
+def printWeightedDescriptives(responses):
+    '''Gets weighted descriptive statistics for responses'''
+    print(f'min: {min(responses)}')
+    print(f'max: {max(responses)}')
+    print(f'weighted mean: {weightedMean(responses)}')
+    print('weighted standard deviation: '\
+    f'{weightedStandardDeviation(responses)}')
 
 def printCrossTabulations(responses1, responses2, responses3):
     '''Formats and prints cross-tabulation results'''
@@ -83,6 +125,7 @@ def printCrossTabulations(responses1, responses2, responses3):
 
 #Creates lists for each data column (and extra list for age bins)
 serials = []
+weights = []
 genders = []
 ages = []
 ageBins = []
@@ -94,9 +137,10 @@ with open(filename) as f:
     for row in f:
         x = row.strip().split(',')
         serials.append(x[0])
-        genders.append(x[1])
-        ages.append(int(x[2]))
-        deodorantUses.append(x[3])
+        weights.append(float(x[1]))
+        genders.append(x[2])
+        ages.append(int(x[3]))
+        deodorantUses.append(x[4])
 
 #Categorises ages into age bins and appends these to age bins list
 for i in range(len(ages)):
@@ -118,18 +162,29 @@ for i in range(len(ages)):
         ageBins.append('age_71_80')
 
 #Performs analyses on data and prints results
-print('Gender Frequencies:')
+print('UN-WEIGHTED RESULTS')
+print('Actual Gender Frequencies:')
 printFrequencies(genders)
 
-print('\ndeodorant Use Frequencies:')
+print('\nActual Deodorant Use Frequencies:')
 printFrequencies(deodorantUses)
 
-print('\nAge Descriptives:')
+print('\nActualAge Descriptives:')
 printDescriptives(ages)
 
-print('\nAge Bin Frequencies:')
+print('\nActual Age Bin Frequencies:')
 printFrequencies(ageBins) 
 
 print('\nCross-Tabulation with Frequencies and Mean Age'\
 ' (Gender, deodorant Use):')
 printCrossTabulations(genders, deodorantUses, ages)
+
+print('\nWEIGHTED RESULTS')
+print('Weighted Gender Frequencies:')
+printWeightedFrequencies(genders)
+
+print('\nWeighted Age Bin Frequencies:')
+printWeightedFrequencies(ageBins)
+
+print('\nWeighted Age Descriptives:')
+printWeightedDescriptives(ages)
