@@ -27,13 +27,7 @@ def standardDeviation(responses):
 def crossTabulateFrequencies(responses1, responses2):
     '''Cross-tabulates 2 responses and returns frequencies'''
     crossTabulationResponses = list(zip(responses1, responses2))
-    crossTabulationFrequencies = {}
-    for t in crossTabulationResponses:
-        if t in crossTabulationFrequencies.keys():
-            crossTabulationFrequencies[t] +=1
-        else:
-            crossTabulationFrequencies[t] =1
-    return(crossTabulationFrequencies)
+    return calculateFrequencies(crossTabulationResponses)
 
 def crossTabulateMeans(responses1, responses2, responses3):
     '''Cross-tabulates 2 responses and returns means of 3rd response'''
