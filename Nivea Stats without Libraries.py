@@ -45,7 +45,7 @@ def standardDeviation(responses):
     return m.sqrt(variance)
 
 def weightedStandardDeviation(responses):
-    '''Calculates standard deviation of responses in a list'''
+    '''Calculates weighted standard deviation of responses in a list'''
     a = list(zip(weights, responses))
     deviations = [x*(y - weightedMean(responses))**2 for x, y in a]
     variance = (sum(deviations)/(sum(weights)))
