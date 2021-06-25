@@ -1,6 +1,4 @@
-import math as m 
-
-filename = r'C:\Users\44797\Downloads\weighted.csv'
+import math as m, pyodbc
 
 def calculateFrequencies(responses):
     '''Calculates frequencies for response'''
@@ -174,16 +172,21 @@ ages = []
 ageBins = []
 deodorantUses = []
 
-#Splits data in csv rows and appends each column to respective list
-with open(filename) as f:
-    next(f)
-    for row in f:
-        x = row.strip().split(',')
-        serials.append(x[0])
-        weights.append(float(x[1]))
-        genders.append(x[2])
-        ages.append(int(x[3]))
-        deodorantUses.append(x[4])
+#Connects to SQL Server Database and seperates data into columns
+connection = pyodbc.connect('Driver={SQL Server};'
+					  'Server=.\sqlexpress;'
+					  'Database=Nivea;'
+					  'Trusted_connection=yes')
+
+cursor = connection.cursor()
+cursor.execute('SELECT * FROM Nivea.dbo.weighted')
+
+for row in cursor:
+    serials.append(row[0])
+    weights.append(float(row[1]))
+    genders.append(row[2])
+    ages.append(int(row[3]))
+    deodorantUses.append(row[4])
 
 #Categorises ages into age bins and appends these to age bins list
 for i in range(len(ages)):
