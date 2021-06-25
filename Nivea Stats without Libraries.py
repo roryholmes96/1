@@ -1,7 +1,7 @@
 import math as m 
 
 filename = r'C:\Users\44797\Downloads\weighted.csv'
- 
+
 def calculateFrequencies(responses):
     '''Calculates frequencies for response'''
     frequencies = {}
@@ -36,24 +36,20 @@ def weightedResponses(responses):
 def weightedMean(responses):
     '''Calculates weighted mean of responses in a list'''
     return sum(weightedResponses(responses))/sum(weights)
-
-def sqrt(x):
-    '''Calculates square root of a value'''
-    return x ** (1/2)
    
 def standardDeviation(responses):
     '''Calculates standard deviation of responses in a list'''
     deviations =\
     [(response - mean(responses)) ** 2 for response in responses]
     variance = (sum(deviations)/(len(deviations)))
-    return sqrt(variance)
+    return m.sqrt(variance)
 
 def weightedStandardDeviation(responses):
     '''Calculates standard deviation of responses in a list'''
     a = list(zip(weights, responses))
     deviations = [x*(y - weightedMean(responses))**2 for x, y in a]
     variance = (sum(deviations)/(sum(weights)))
-    return sqrt(variance)
+    return m.sqrt(variance)
 
 def crossTabulateFrequencies(responses1, responses2):
     '''Cross-tabulates 2 responses and returns frequencies'''
@@ -204,7 +200,7 @@ printFrequencies(deodorantUses)
 print('\nAge Descriptives:')
 printDescriptives(ages)
 
-print('\nAge Bin Frequencies:')
+print('\nAge Bin Frequencies (0 = 0-10, 1 = 11-20...):')
 printFrequencies(ageBins) 
 
 print('\nCross-Tabulation with Frequencies and Mean Ages'\
@@ -215,7 +211,7 @@ print('\nWEIGHTED RESULTS')
 print('Weighted Gender Frequencies:')
 printWeightedFrequencies(genders)
 
-print('\nWeighted Age Bin Frequencies (0 = 0-10, 1 = 11-20:')
+print('\nWeighted Age Bin Frequencies (0 = 0-10, 1 = 11-20...):')
 printWeightedFrequencies(ageBins)
 
 print('\nWeighted Age Descriptives:')
