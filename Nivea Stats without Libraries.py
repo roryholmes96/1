@@ -1,3 +1,5 @@
+import math as m 
+
 filename = r'C:\Users\44797\Downloads\weighted.csv'
  
 def calculateFrequencies(responses):
@@ -58,6 +60,10 @@ def crossTabulateFrequencies(responses1, responses2):
     crossTabulationResponses = list(zip(responses1, responses2))
     return calculateFrequencies(crossTabulationResponses)
 
+def crossTabulateWeightedFrequencies(responses1, responses2):
+    crossTabulationResponses = list(zip(responses1, responses2))
+    return calculateWeightedFrequencies(crossTabulationResponses)
+
 def crossTabulateMeans(responses1, responses2, responses3):
     '''Cross-tabulates 2 responses and returns means of 3rd response'''
     crossTabulationFrequencies = \
@@ -78,6 +84,31 @@ def crossTabulateMeans(responses1, responses2, responses3):
 
     means = []
     for x,y in frequencySums:
+        means.append(x/y)
+
+    return dict(zip(means, list(zip(responses1, responses2))))
+
+def crossTabulateWeightedMeans(responses1, responses2, responses3):
+    '''Cross-tabulates 2 responses and returns weighted means of 3rd response'''
+    crossTabulationWeightedFrequencies = \
+    crossTabulateWeightedFrequencies(responses1, responses2)
+    
+    crossTabulationResponses = \
+    list(zip(weights, responses1, responses2, responses3))
+    crossTabulationWeightedSums = {}
+    
+    for w, x, y, z in crossTabulationResponses:
+        if (x, y) in crossTabulationWeightedSums.keys():
+            crossTabulationWeightedSums[(x,y)] += w*z
+        else:
+            crossTabulationWeightedSums[(x,y)] = w*z
+
+    frequencySums = list\
+    (zip(crossTabulationWeightedSums.values(),\
+    crossTabulationWeightedFrequencies.values()))
+
+    means = []
+    for x, y in frequencySums:
         means.append(x/y)
 
     return dict(zip(means, list(zip(responses1, responses2))))
@@ -123,6 +154,22 @@ def printCrossTabulations(responses1, responses2, responses3):
     for x,y,z in sorted(fullCrossTabulation): 
         print(f'{x}: frequency = {y}, mean age = {z}')
 
+def printWeightedCrossTabulations(responses1, responses2, responses3):
+    '''Formats and prints weighted cross-tabulation results'''
+    crossTabulationWeightedFrequencies = \
+    crossTabulateWeightedFrequencies(responses1, responses2)
+
+    crossTabulationWeightedMeans = \
+    crossTabulateWeightedMeans (responses1, responses2, responses3)
+
+    fullWeightedCrossTabulation = \
+    list(zip(crossTabulationWeightedFrequencies.keys(),\
+    crossTabulationWeightedFrequencies.values(),\
+    crossTabulationWeightedMeans))
+
+    for x,y,z in sorted(fullWeightedCrossTabulation): 
+        print(f'{x}: frequency = {y}, mean age = {z}')
+
 #Creates lists for each data column (and extra list for age bins)
 serials = []
 weights = []
@@ -144,47 +191,36 @@ with open(filename) as f:
 
 #Categorises ages into age bins and appends these to age bins list
 for i in range(len(ages)):
-    if ages[i] < 11:
-        ageBins.append('age_0_10')
-    elif ages[i] < 21:
-        ageBins.append('age_11_20')
-    elif ages[i] < 31:
-        ageBins.append('age_21_30')    
-    elif ages[i] < 41:
-        ageBins.append('age_31_40')
-    elif ages[i] < 51:
-        ageBins.append('age_41_50')
-    elif ages[i] < 61:
-        ageBins.append('age_51_60')
-    elif ages[i] < 71:
-        ageBins.append('age_61_70')
-    elif ages[i] < 81:
-        ageBins.append('age_71_80')
+    ageBins.append(m.floor((ages[i]-1)/10))
 
 #Performs analyses on data and prints results
 print('UN-WEIGHTED RESULTS')
 print('Actual Gender Frequencies:')
 printFrequencies(genders)
 
-print('\nActual Deodorant Use Frequencies:')
+print('\nDeodorant Use Frequencies:')
 printFrequencies(deodorantUses)
 
-print('\nActualAge Descriptives:')
+print('\nAge Descriptives:')
 printDescriptives(ages)
 
-print('\nActual Age Bin Frequencies:')
+print('\nAge Bin Frequencies:')
 printFrequencies(ageBins) 
 
-print('\nCross-Tabulation with Frequencies and Mean Age'\
-' (Gender, deodorant Use):')
+print('\nCross-Tabulation with Frequencies and Mean Ages'\
+' (Gender, Deodorant Use):')
 printCrossTabulations(genders, deodorantUses, ages)
 
 print('\nWEIGHTED RESULTS')
 print('Weighted Gender Frequencies:')
 printWeightedFrequencies(genders)
 
-print('\nWeighted Age Bin Frequencies:')
+print('\nWeighted Age Bin Frequencies (0 = 0-10, 1 = 11-20:')
 printWeightedFrequencies(ageBins)
 
 print('\nWeighted Age Descriptives:')
 printWeightedDescriptives(ages)
+
+print('\nCross-Tabulation with Weighted Frequencies and Mean Ages'\
+' (Gender, Deodorant Use):')
+printWeightedCrossTabulations(genders,deodorantUses,ages)
