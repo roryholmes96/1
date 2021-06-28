@@ -59,7 +59,7 @@ connection = pyodbc.connect('Driver={SQL Server};'
 					        'Trusted_connection=yes')
 
 cursor = connection.cursor()
-cursor.execute('SELEct * FROM Nivea.dbo.weighted_custom')
+cursor.execute('SELECT * FROM Nivea.dbo.weighted_custom')
 
 data = []
 for row in cursor:
