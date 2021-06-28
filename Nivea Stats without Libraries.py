@@ -172,11 +172,11 @@ ages = []
 ageBins = []
 deodorantUses = []
 
-#Connects to SQL Server Database and separates data into columns
+#Connects to SQL Server Database and separates data into column lists
 connection = pyodbc.connect('Driver={SQL Server};'
-					  'Server=.\sqlexpress;'
-					  'Database=Nivea;'
-					  'Trusted_connection=yes')
+					        'Server=.\sqlexpress;'
+					        'Database=Nivea;'
+					        'Trusted_connection=yes')
 
 cursor = connection.cursor()
 cursor.execute('SELECT * FROM Nivea.dbo.weighted_custom')
@@ -186,11 +186,17 @@ for row in cursor:
 	data.append(row[6])
 
 for i in data:
-	 x = i.split('&')
-	 weights.append(float((x[0].replace('wgt=',''))))
-	 genders.append(x[1].replace('Qs0=',''))
-	 ages.append(int((x[2].replace('Qs1_1=',''))))
-	 deodorantUses.append(x[3].replace('Qs3=',''))
+	x = i.split('&')
+
+	for i in x:
+		if 'wgt' in i:
+			weights.append(float((i.replace('wgt=',''))))
+		elif 'Qs0' in i:
+			genders.append(i.replace('Qs0=',''))
+		elif 'Qs1_1' in i:
+			ages.append(int(i.replace('Qs1_1=','')))
+		elif 'Qs3' in i:
+			deodorantUses.append(i.replace('Qs3=',''))
 
 #Categorises ages into age bins and appends these to age bins list
 for i in range(len(ages)):
