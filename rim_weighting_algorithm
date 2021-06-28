@@ -1,44 +1,50 @@
 import pprint, math as m, pyodbc
 
-def calculateFrequencies(responses):
+def calcfreq(responses):
     '''Calculates frequencies for response'''
-    frequencies = {}
+    freq = {}
     for response in responses:
-        if response in frequencies.keys():
-            frequencies[response] +=1
+        if response in freq.keys():
+            freq[response] +=1
         else:
-            frequencies[response] = 1
-    return frequencies
+            freq[response] = 1
+    return freq
 
-def crossTabulateFrequencies(responses1, responses2):
+def crosstabFreq(responses1, responses2):
     '''Cross-tabulates 2 responses and returns frequencies'''
-    crossTabulationResponses = list(zip(responses1, responses2))
-    return calculateFrequencies(crossTabulationResponses)
+    return calcfreq(list(zip(responses1, responses2)))
 
-def calculateCGF(CT): 
+def calcCgf(ct): 
 	'''Calculates current gender frequencies from crosstab dictionary'''
 	return \
-	{'1': (CT[(1,'1')] + CT[(2, '1')] + CT[(3,'1')] + CT[(4,'1')]\
-	+ CT[(5,'1')] + CT[(6,'1')] + CT[(7,'1')]), \
-	'2': (CT[(1,'2')] + CT[(2, '2')] + CT[(3,'2')] + CT[(4,'2')]\
-	+ CT[(5,'2')] + CT[(6,'2')] + CT[(7,'2')])}
+	{'1': (ct[(1,'1')] + ct[(2, '1')] + ct[(3,'1')] + ct[(4,'1')]\
+	+ ct[(5,'1')] + ct[(6,'1')] + ct[(7,'1')]), \
+	'2': (ct[(1,'2')] + ct[(2, '2')] + ct[(3,'2')] + ct[(4,'2')]\
+	+ ct[(5,'2')] + ct[(6,'2')] + ct[(7,'2')])}
 
-def calculateCAF(CT):
+def calcCaf(ct):
 	'''Calculates current age frequencies from crosstab dictionary'''
-	return {'1': (CT[(1,'1')] + CT[(1, '2')]),\
-	'2': (CT[(2,'1')] + CT[(2, '2')]),\
-	'3': (CT[(3,'1')] + CT[(3, '2')]),\
-	'4': (CT[(4,'1')] + CT[(4, '2')]),\
-	'5': (CT[(5,'1')] + CT[(5, '2')]),\
-	'6': (CT[(6,'1')] + CT[(6, '2')]),\
-	'7': (CT[(7,'1')] + CT[(7, '2')])}
+	return {'1': (ct[(1,'1')] + ct[(1, '2')]),\
+	'2': (ct[(2,'1')] + ct[(2, '2')]),\
+	'3': (ct[(3,'1')] + ct[(3, '2')]),\
+	'4': (ct[(4,'1')] + ct[(4, '2')]),\
+	'5': (ct[(5,'1')] + ct[(5, '2')]),\
+	'6': (ct[(6,'1')] + ct[(6, '2')]),\
+	'7': (ct[(7,'1')] + ct[(7, '2')])}
 
-def diffADF(CAF, DAF):
+def diffAdf(caf, daf):
 	'''calculates total difference between actual and desired frequencies'''
 	a = 0
-	for x, y in zip(CAF.values(), DAF.values()):
+	for x, y in zip(caf.values(), daf.values()):
 		a += abs(x - y)
 	return a
+
+def calcWeights(cf, df):
+	'''calculates weight factors as df/cf quotient'''
+	weights = []
+	for x, y in zip(cf.values(), df.values()):
+		weights.append(y/x)
+	return weights
 
 #Creates list for each variable
 genders = []
@@ -53,7 +59,7 @@ connection = pyodbc.connect('Driver={SQL Server};'
 					        'Trusted_connection=yes')
 
 cursor = connection.cursor()
-cursor.execute('SELECT * FROM Nivea.dbo.weighted_custom')
+cursor.execute('SELEct * FROM Nivea.dbo.weighted_custom')
 
 data = []
 for row in cursor:
@@ -76,38 +82,34 @@ for i in range(len(ages)):
     ageBins.append(m.floor((ages[i]-1)/10))
 
 #Sets desired frequency distribution
-DAF = {'1':75, '2':400, '3':500, '4':300, '5':200, '6':29, '7':1}
+daf = {'1':75, '2':400, '3':500, '4':300, '5':200, '6':29, '7':1}
 DGF = {'1':700, '2':805}
 
 #Calculates initial crosstabulation based on actual frequencies
-CT = crossTabulateFrequencies(ageBins, genders)
+ct = crosstabFreq(ageBins, genders)
 
 #Calulcates current frequencies for gender
-CGF = calculateCGF(CT)
+cgf = calcCgf(ct)
 
 #Calculates weights based on gender
-weights = []
-for x, y in zip(CGF.values(), DGF.values()):
-	weights.append(y/x)
+weights = calcWeights(cgf, DGF)
 
 #Applies weights based on gender and updates dictionary crosstab frequencies
-for k, v in CT.items():
+for k, v in ct.items():
 	if k[1] == '1':
 		v = v*weights[0]
 	elif k[1] == '2':
 		v = v*weights[1]
-	CT[k] = v
+	ct[k] = v
 
 #Updates current frequencies after weighting for age
-CAF = calculateCAF(CT)
+caf = calcCaf(ct)
 
 #Calculates weights based on age
-weights = []
-for x, y in zip(CAF.values(), DAF.values()):
-	weights.append(y/x)
+weights = calcWeights(caf, daf)
 
 #Applies weights based on age and updates dictionary crosstab frequencies
-for k, v in CT.items():
+for k, v in ct.items():
 	if k[0] == 1:
 		v = v*weights[0]
 	elif k[0] == 2:
@@ -122,40 +124,40 @@ for k, v in CT.items():
 		v = v*weights[5]
 	elif k[0] == 7:
 		v = v*weights[6]
-	CT[k] = v
+	ct[k] = v
 
 #Updates current frequencies after weighting
-CGF = calculateCGF(CT)
-CAF = calculateCAF(CT)
+cgf = calcCgf(ct)
+caf = calcCaf(ct)
 
-x = diffADF(CAF, DAF)
-y = diffADF(CGF, DGF)
+x = diffAdf(caf, daf)
+y = diffAdf(cgf, DGF)
 print(x/y)
 
 #####SECOND ITERATION OF WEIGHTING######
 #Calculates weights based on gender
-weights = []
-for x, y in zip(CGF.values(), DGF.values()):
-	weights.append(y/x)
+#Calulcates current frequencies for gender
+cgf = calcCgf(ct)
+
+#Calculates weights based on gender
+weights = calcWeights(cgf, DGF)
 
 #Applies weights based on gender and updates dictionary crosstab frequencies
-for k, v in CT.items():
+for k, v in ct.items():
 	if k[1] == '1':
 		v = v*weights[0]
 	elif k[1] == '2':
 		v = v*weights[1]
-	CT[k] = v
+	ct[k] = v
 
 #Updates current frequencies after weighting for age
-CAF = calculateCAF(CT)
+caf = calcCaf(ct)
 
 #Calculates weights based on age
-weights = []
-for x, y in zip(CAF.values(), DAF.values()):
-	weights.append(y/x)
+weights = calcWeights(caf, daf)
 
 #Applies weights based on age and updates dictionary crosstab frequencies
-for k, v in CT.items():
+for k, v in ct.items():
 	if k[0] == 1:
 		v = v*weights[0]
 	elif k[0] == 2:
@@ -170,12 +172,20 @@ for k, v in CT.items():
 		v = v*weights[5]
 	elif k[0] == 7:
 		v = v*weights[6]
-	CT[k] = v
+	ct[k] = v
 
 #Updates current frequencies after weighting
-CGF = calculateCGF(CT)
-CAF = calculateCAF(CT)
+cgf = calcCgf(ct)
+caf = calcCaf(ct)
 
-x = diffADF(CAF, DAF)
-y = diffADF(CGF, DGF)
+x = diffAdf(caf, daf)
+y = diffAdf(cgf, DGF)
 print(x/y)
+
+class Matrix:
+	"""Model of a matrix e.g. cross-tabulation"""
+	matrix = {}
+
+	def __init__(self, height, width):
+		self.height = height
+		self.width = width
