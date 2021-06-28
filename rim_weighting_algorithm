@@ -1,6 +1,6 @@
 import math as m, pyodbc
 
-def calcfreq(responses):
+def calcFreq(responses):
     '''Calculates frequencies for response'''
     freq = {}
     for response in responses:
