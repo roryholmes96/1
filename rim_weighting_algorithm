@@ -12,7 +12,7 @@ def calcFreq(responses):
 
 def crosstabFreq(responses1, responses2):
     '''Cross-tabulates 2 responses and returns frequencies'''
-    return calcfreq(list(zip(responses1, responses2)))
+    return calcFreq(list(zip(responses1, responses2)))
 
 def calcCgf(ct): 
 	'''Calculates current gender frequencies from crosstab dictionary'''
