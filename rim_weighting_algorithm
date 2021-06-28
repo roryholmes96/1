@@ -46,6 +46,13 @@ def calcWeights(cf, df):
 		weights.append(y/x)
 	return weights
 
+# for k, v in ct.items():
+# 		if k[1] == '1':
+# 			v = v*weights[0]
+# 		elif k[1] == '2':
+# 			v = v*weights[1]
+# 		ct[k] = v
+
 #Creates list for each variable
 genders = []
 ages = []
@@ -86,106 +93,65 @@ daf = {'1':75, '2':400, '3':500, '4':300, '5':200, '6':29, '7':1}
 dgf = {'1':700, '2':805}
 
 #Calculates initial crosstabulation based on actual frequencies
+act = crosstabFreq(ageBins, genders)
 ct = crosstabFreq(ageBins, genders)
 
-#Calulcates current frequencies for gender
+#Assigns current frequencies
+caf = calcCaf(ct)
 cgf = calcCgf(ct)
 
-#Calculates weights based on gender
-weights = calcWeights(cgf, dgf)
+#Rim-Weighting Algorithm
+iteration = 0
+while diffCdf(caf, daf)/diffCdf(cgf, dgf) > 0.0000000000000001:
 
-#Applies weights based on gender and updates dictionary crosstab frequencies
-for k, v in ct.items():
-	if k[1] == '1':
-		v = v*weights[0]
-	elif k[1] == '2':
-		v = v*weights[1]
-	ct[k] = v
+	#Calulcates current frequencies for gender
+	cgf = calcCgf(ct)
 
-#Updates current frequencies after weighting for age
-caf = calcCaf(ct)
+	#Calculates weights based on gender
+	weights = calcWeights(cgf, dgf)
 
-#Calculates weights based on age
-weights = calcWeights(caf, daf)
+	#Applies weights based on gender and updates dictionary crosstab frequencies
+	for k, v in ct.items():
+		if k[1] == '1':
+			v = v*weights[0]
+		elif k[1] == '2':
+			v = v*weights[1]
+		ct[k] = v
 
-#Applies weights based on age and updates dictionary crosstab frequencies
-for k, v in ct.items():
-	if k[0] == 1:
-		v = v*weights[0]
-	elif k[0] == 2:
-		v = v*weights[1]
-	elif k[0] == 3:
-		v = v*weights[2]
-	elif k[0] == 4:
-		v = v*weights[3]
-	elif k[0] == 5:
-		v = v*weights[4]
-	elif k[0] == 6:
-		v = v*weights[5]
-	elif k[0] == 7:
-		v = v*weights[6]
-	ct[k] = v
+	#Updates current frequencies after weighting for age
+	caf = calcCaf(ct)
 
-#Updates current frequencies after weighting
-cgf = calcCgf(ct)
-caf = calcCaf(ct)
+	#Calculates weights based on age
+	weights = calcWeights(caf, daf)
 
-x = diffAdf(caf, daf)
-y = diffAdf(cgf, dgf)
-print(x/y)
+	#Applies weights based on age and updates dictionary crosstab frequencies
+	for k, v in ct.items():
+		if k[0] == 1:
+			v = v*weights[0]
+		elif k[0] == 2:
+			v = v*weights[1]
+		elif k[0] == 3:
+			v = v*weights[2]
+		elif k[0] == 4:
+			v = v*weights[3]
+		elif k[0] == 5:
+			v = v*weights[4]
+		elif k[0] == 6:
+			v = v*weights[5]
+		elif k[0] == 7:
+			v = v*weights[6]
+		ct[k] = v
 
-#####SECOND ITERATION OF WEIGHTING######
-#Calculates weights based on gender
-#Calulcates current frequencies for gender
-cgf = calcCgf(ct)
+	#Updates current frequencies after weighting
+	cgf = calcCgf(ct)
+	caf = calcCaf(ct)
 
-#Calculates weights based on gender
-weights = calcWeights(cgf, dgf)
+	x = diffCdf(caf, daf)
+	y = diffCdf(cgf, dgf)
 
-#Applies weights based on gender and updates dictionary crosstab frequencies
-for k, v in ct.items():
-	if k[1] == '1':
-		v = v*weights[0]
-	elif k[1] == '2':
-		v = v*weights[1]
-	ct[k] = v
+	iteration +=1
+	print(f'iteration: {iteration} \n\
+	total difference between actual and desired frequencies: {x/y}')
 
-#Updates current frequencies after weighting for age
-caf = calcCaf(ct)
-
-#Calculates weights based on age
-weights = calcWeights(caf, daf)
-
-#Applies weights based on age and updates dictionary crosstab frequencies
-for k, v in ct.items():
-	if k[0] == 1:
-		v = v*weights[0]
-	elif k[0] == 2:
-		v = v*weights[1]
-	elif k[0] == 3:
-		v = v*weights[2]
-	elif k[0] == 4:
-		v = v*weights[3]
-	elif k[0] == 5:
-		v = v*weights[4]
-	elif k[0] == 6:
-		v = v*weights[5]
-	elif k[0] == 7:
-		v = v*weights[6]
-	ct[k] = v
-
-#Updates current frequencies after weighting
-cgf = calcCgf(ct)
-caf = calcCaf(ct)
-
-x = diffCdf(caf, daf)
-y = diffCdf(cgf, dgf)
-print(x/y)
-
-class Matrix:
-	"""Model of a matrix e.g. cross-tabulation"""
-	matrix = {}
-
-	def __init__(self, height, width):
-		self.height = height
-		self.width = width
+weights = calcWeights(act, ct)
+print(f'\nWeights calculated after {iteration} iterations:\n{weights}')
