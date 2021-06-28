@@ -32,10 +32,10 @@ def calcCaf(ct):
 	'6': (ct[(6,'1')] + ct[(6, '2')]),\
 	'7': (ct[(7,'1')] + ct[(7, '2')])}
 
-def diffAdf(caf, daf):
-	'''calculates total difference between actual and desired frequencies'''
+def diffCdf(cf, df):
+	'''calculates total difference between current and desired frequencies'''
 	a = 0
-	for x, y in zip(caf.values(), daf.values()):
+	for x, y in zip(cf.values(), df.values()):
 		a += abs(x - y)
 	return a
 
@@ -83,7 +83,7 @@ for i in range(len(ages)):
 
 #Sets desired frequency distribution
 daf = {'1':75, '2':400, '3':500, '4':300, '5':200, '6':29, '7':1}
-DGF = {'1':700, '2':805}
+dgf = {'1':700, '2':805}
 
 #Calculates initial crosstabulation based on actual frequencies
 ct = crosstabFreq(ageBins, genders)
@@ -92,7 +92,7 @@ ct = crosstabFreq(ageBins, genders)
 cgf = calcCgf(ct)
 
 #Calculates weights based on gender
-weights = calcWeights(cgf, DGF)
+weights = calcWeights(cgf, dgf)
 
 #Applies weights based on gender and updates dictionary crosstab frequencies
 for k, v in ct.items():
@@ -131,7 +131,7 @@ cgf = calcCgf(ct)
 caf = calcCaf(ct)
 
 x = diffAdf(caf, daf)
-y = diffAdf(cgf, DGF)
+y = diffAdf(cgf, dgf)
 print(x/y)
 
 #####SECOND ITERATION OF WEIGHTING######
@@ -140,7 +140,7 @@ print(x/y)
 cgf = calcCgf(ct)
 
 #Calculates weights based on gender
-weights = calcWeights(cgf, DGF)
+weights = calcWeights(cgf, dgf)
 
 #Applies weights based on gender and updates dictionary crosstab frequencies
 for k, v in ct.items():
@@ -178,8 +178,8 @@ for k, v in ct.items():
 cgf = calcCgf(ct)
 caf = calcCaf(ct)
 
-x = diffAdf(caf, daf)
-y = diffAdf(cgf, DGF)
+x = diffCdf(caf, daf)
+y = diffCdf(cgf, dgf)
 print(x/y)
 
 class Matrix:
