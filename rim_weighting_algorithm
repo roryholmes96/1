@@ -1,4 +1,4 @@
-import pprint, math as m, pyodbc
+import math as m, pyodbc
 
 def calcfreq(responses):
     '''Calculates frequencies for response'''
