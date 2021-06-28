@@ -46,13 +46,6 @@ def calcWeights(cf, df):
 		weights.append(y/x)
 	return weights
 
-# for k, v in ct.items():
-# 		if k[1] == '1':
-# 			v = v*weights[0]
-# 		elif k[1] == '2':
-# 			v = v*weights[1]
-# 		ct[k] = v
-
 #Creates list for each variable
 genders = []
 ages = []
