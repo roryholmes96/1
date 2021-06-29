@@ -1,50 +1,73 @@
 import math as m, pyodbc
 
-def calcFreq(responses):
-    '''Calculates frequencies for response'''
-    freq = {}
+def calcFrequencies(responses):
+    '''Calculates frequencies for responses of a given variable'''
+    frequencies = {}
     for response in responses:
-        if response in freq.keys():
-            freq[response] +=1
+        if response in frequencies.keys():
+            frequencies[response] += 1
         else:
-            freq[response] = 1
-    return freq
+            frequencies[response] = 1
+    return frequencies
 
-def crosstabFreq(responses1, responses2):
-    '''Cross-tabulates 2 responses and returns frequencies'''
-    return calcFreq(list(zip(responses1, responses2)))
+def crosstabFrequencies(responses1, responses2):
+    '''Cross-tabulates responses for 2 variables and returns frequencies'''
+    return calcFrequencies(list(zip(responses1, responses2)))
 
-def calcCtFreq (ct):
-	'''Calculates frequencies of variable responses from a crosstab'''
-	r1freq = {}
-	r2freq = {}
+def aggregateCrosstabFrequencies (crosstab):
+	'''Aggregates frequencies of responses for each variable in a crosstab'''
+	frequencies1 = {}
+	frequencies2 = {}
 
-	for (r1, r2), freq in ct.items():
-		if r1 in r1freq.keys():
-			r1freq[r1] += freq
+	for (responses1, responses2), frequency in crosstab.items():
+		if responses1 in frequencies1.keys():
+			frequencies1[responses1] += frequency
 		else:
-			r1freq[r1] = freq
+			frequencies1[responses1] = frequency
 
-	for (r1, r2), freq in ct.items():
-		if r2 in r2freq.keys():
-			r2freq[r2] += freq
+		if responses2 in frequencies2.keys():
+			frequencies2[responses2] += frequency
 		else:
-			r2freq[r2] = freq
+			frequencies2[responses2] = frequency
 
-	return dict(sorted(r1freq.items())), dict(sorted(r2freq.items()))
+	return dict(sorted(frequencies1.items())),\
+		   dict(sorted(frequencies2.items()))
 
-def diffCdf(cf, df):
+def frequenciesDifference(currentFrequencies, desiredFrequencies):
 	'''Calculates total difference between current and desired frequencies'''
-	a = 0
-	for x, y in zip(cf.values(), df.values()):
-		a += abs(x - y)
-	return a
+	totalDiff = 0
 
-def calcWeights(cf, df):
+	for currentFrequency, desiredFrequency in\
+		zip(currentFrequencies.values(), desiredFrequencies.values()):
+		
+		totalDiff += abs(currentFrequency - desiredFrequency)
+
+	return totalDiff
+
+def calcDifferencePerCase(currentFrequencies1, desiredFrequencies1,\
+ 					      currentFrequencies2, desiredFrequencies2):
+	'''Calculates total difference between current and desired frequencies 
+	per case (this is used to check whether to perform another iteration)'''
+
+	x = frequenciesDifference(currentFrequencies1,\
+							  desiredFrequencies1)
+
+	y = frequenciesDifference(currentFrequencies2,\
+							  desiredFrequencies2)
+
+	totalFrequenciesDifference = x+y
+	sampleSize = sum(actualCrosstab.values())
+	return totalFrequenciesDifference / sampleSize
+
+def calcWeights(currentFrequencies, desiredFrequencies):
 	'''Calculates weight factors as df/cf quotient'''
 	weights = []
-	for x, y in zip(cf.values(), df.values()):
-		weights.append(y/x)
+
+	for currentFrequency, desiredFrequency in\
+		zip(currentFrequencies.values(), desiredFrequencies.values()):
+
+		weights.append(desiredFrequency/currentFrequency)
+
 	return weights
 
 #Creates list for each variable
@@ -83,68 +106,70 @@ for i in range(len(ages)):
     ageBins.append(m.floor((ages[i]-1)/10))
 
 #Sets desired frequency distribution
-daf = {'1':75, '2':400, '3':500, '4':300, '5':200, '6':29, '7':1}
-dgf = {'1':700, '2':805}
+desiredAgeFrequencies = \
+{'1':75, '2':400, '3':500, '4':300, '5':200, '6':29, '7':1}
 
-#Assigns actual and current crosstabulation based on actual frequencies
-act = crosstabFreq(ageBins, genders)
-ct = crosstabFreq(ageBins, genders)
+desiredGenderFrequencies = \
+{'1':700, '2':805}
 
-#Assigns current frequencies
-caf, cgf = calcCtFreq(ct)
+#Assigns actual and initial current crosstabulation based on actual frequencies
+actualCrosstab = crosstabFrequencies(ageBins, genders)
+currentCrosstab = crosstabFrequencies(ageBins, genders)
 
-#Rim-Weighting Algorithm
+#Assigns initial current frequencies
+currentAgeFrequencies, currentGenderFrequencies = \
+aggregateCrosstabFrequencies(currentCrosstab)
+
+print(currentAgeFrequencies)
+print(currentGenderFrequencies)
+
+#Assigns initial total difference between actual and desired freq per case
+differencePerCase = \
+calcDifferencePerCase(currentAgeFrequencies, desiredAgeFrequencies, \
+					  currentGenderFrequencies, desiredGenderFrequencies)
+
+# Rim-Weighting Algorithm
 iteration = 0
-while diffCdf(caf, daf)/diffCdf(cgf, dgf) > 0.0000000000000001:
+while differencePerCase > 0.0000000000000001:
 
 	#Updates current frequencies
-	caf, cgf = calcCtFreq(ct)
+	currentAgeFrequencies, currentGenderFrequencies = \
+	aggregateCrosstabFrequencies(currentCrosstab)
 
 	#Calculates weights based on gender
-	weights = calcWeights(cgf, dgf)
+	weights = calcWeights(currentGenderFrequencies, desiredGenderFrequencies)
 
 	#Applies weights based on gender and updates crosstab frequencies
-	for k, v in ct.items():
-		if k[1] == '1':
-			v = v*weights[0]
-		elif k[1] == '2':
-			v = v*weights[1]
-		ct[k] = v
-
+	for k, v in currentCrosstab.items():
+		v = v*weights[int(k[1])-1]
+		currentCrosstab[k] = v
 
 	#Updates current frequencies after weighting for age
-	caf, cgf = calcCtFreq(ct)
+	currentAgeFrequencies, currentGenderFrequencies = \
+	aggregateCrosstabFrequencies(currentCrosstab)
 
 	#Calculates weights based on age
-	weights = calcWeights(caf, daf)
+	weights = calcWeights(currentAgeFrequencies, desiredAgeFrequencies)
 
 	#Applies weights based on age and updates crosstab frequencies
-	for k, v in ct.items():
-		if k[0] == 1:
-			v = v*weights[0]
-		elif k[0] == 2:
-			v = v*weights[1]
-		elif k[0] == 3:
-			v = v*weights[2]
-		elif k[0] == 4:
-			v = v*weights[3]
-		elif k[0] == 5:
-			v = v*weights[4]
-		elif k[0] == 6:
-			v = v*weights[5]
-		elif k[0] == 7:
-			v = v*weights[6]
-		ct[k] = v
+	for k, v in currentCrosstab.items():
+		v = v*weights[k[0]-1]
+		currentCrosstab[k] = v
 
 	#Updates current frequencies after weighting for gender
-	caf, cgf = calcCtFreq(ct)
+	currentAgeFrequencies, currentGenderFrequencies = \
+	aggregateCrosstabFrequencies(currentCrosstab)
 
-	x = diffCdf(caf, daf)
-	y = diffCdf(cgf, dgf)
+	#Updates difference per case at end of iteration
+	differencePerCase = \
+	calcDifferencePerCase(currentAgeFrequencies, desiredAgeFrequencies, \
+						currentGenderFrequencies, desiredGenderFrequencies)
 
+	#Increases iteration and prints current iteration and difference per case
 	iteration +=1
 	print(f'iteration: {iteration} \n\
-	total difference between actual and desired frequencies: {x/y}')
+	total difference per case between actual and desired frequencies:'\
+	f' {differencePerCase}')
 
-weights = calcWeights(act, ct)
+weights = calcWeights(actualCrosstab, currentCrosstab)
 print(f'\nWeights calculated after {iteration} iterations:\n{weights}')
