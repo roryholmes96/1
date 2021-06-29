@@ -120,9 +120,6 @@ currentCrosstab = crosstabFrequencies(ageBins, genders)
 currentAgeFrequencies, currentGenderFrequencies = \
 aggregateCrosstabFrequencies(currentCrosstab)
 
-print(currentAgeFrequencies)
-print(currentGenderFrequencies)
-
 #Assigns initial total difference between actual and desired freq per case
 differencePerCase = \
 calcDifferencePerCase(currentAgeFrequencies, desiredAgeFrequencies, \
@@ -163,7 +160,7 @@ while differencePerCase > 0.0000000000000001:
 	#Updates difference per case at end of iteration
 	differencePerCase = \
 	calcDifferencePerCase(currentAgeFrequencies, desiredAgeFrequencies, \
-						currentGenderFrequencies, desiredGenderFrequencies)
+						  currentGenderFrequencies, desiredGenderFrequencies)
 
 	#Increases iteration and prints current iteration and difference per case
 	iteration +=1
