@@ -14,33 +14,34 @@ def crosstabFreq(responses1, responses2):
     '''Cross-tabulates 2 responses and returns frequencies'''
     return calcFreq(list(zip(responses1, responses2)))
 
-def calcCgf(ct): 
-	'''Calculates current gender frequencies from crosstab dictionary'''
-	return \
-	{'1': (ct[(1,'1')] + ct[(2, '1')] + ct[(3,'1')] + ct[(4,'1')]\
-	+ ct[(5,'1')] + ct[(6,'1')] + ct[(7,'1')]), \
-	'2': (ct[(1,'2')] + ct[(2, '2')] + ct[(3,'2')] + ct[(4,'2')]\
-	+ ct[(5,'2')] + ct[(6,'2')] + ct[(7,'2')])}
+def calcCtFreq (ct):
+	'''Calculates frequencies of variable responses from a crosstab'''
+	r1freq = {}
+	r2freq = {}
 
-def calcCaf(ct):
-	'''Calculates current age frequencies from crosstab dictionary'''
-	return {'1': (ct[(1,'1')] + ct[(1, '2')]),\
-	'2': (ct[(2,'1')] + ct[(2, '2')]),\
-	'3': (ct[(3,'1')] + ct[(3, '2')]),\
-	'4': (ct[(4,'1')] + ct[(4, '2')]),\
-	'5': (ct[(5,'1')] + ct[(5, '2')]),\
-	'6': (ct[(6,'1')] + ct[(6, '2')]),\
-	'7': (ct[(7,'1')] + ct[(7, '2')])}
+	for (r1, r2), freq in ct.items():
+		if r1 in r1freq.keys():
+			r1freq[r1] += freq
+		else:
+			r1freq[r1] = freq
+
+	for (r1, r2), freq in ct.items():
+		if r2 in r2freq.keys():
+			r2freq[r2] += freq
+		else:
+			r2freq[r2] = freq
+
+	return dict(sorted(r1freq.items())), dict(sorted(r2freq.items()))
 
 def diffCdf(cf, df):
-	'''calculates total difference between current and desired frequencies'''
+	'''Calculates total difference between current and desired frequencies'''
 	a = 0
 	for x, y in zip(cf.values(), df.values()):
 		a += abs(x - y)
 	return a
 
 def calcWeights(cf, df):
-	'''calculates weight factors as df/cf quotient'''
+	'''Calculates weight factors as df/cf quotient'''
 	weights = []
 	for x, y in zip(cf.values(), df.values()):
 		weights.append(y/x)
@@ -65,7 +66,7 @@ data = []
 for row in cursor:
 	data.append(row[6])
 
-#Separates data into variables and appends these to respective variable lists
+#Separates data by variable and appends these to respective variable lists
 for i in data:
 	x = i.split('&')
 
@@ -85,25 +86,24 @@ for i in range(len(ages)):
 daf = {'1':75, '2':400, '3':500, '4':300, '5':200, '6':29, '7':1}
 dgf = {'1':700, '2':805}
 
-#Calculates initial crosstabulation based on actual frequencies
+#Assigns actual and current crosstabulation based on actual frequencies
 act = crosstabFreq(ageBins, genders)
 ct = crosstabFreq(ageBins, genders)
 
 #Assigns current frequencies
-caf = calcCaf(ct)
-cgf = calcCgf(ct)
+caf, cgf = calcCtFreq(ct)
 
 #Rim-Weighting Algorithm
 iteration = 0
 while diffCdf(caf, daf)/diffCdf(cgf, dgf) > 0.0000000000000001:
 
-	#Calulcates current frequencies for gender
-	cgf = calcCgf(ct)
+	#Updates current frequencies
+	caf, cgf = calcCtFreq(ct)
 
 	#Calculates weights based on gender
 	weights = calcWeights(cgf, dgf)
 
-	#Applies weights based on gender and updates dictionary crosstab frequencies
+	#Applies weights based on gender and updates crosstab frequencies
 	for k, v in ct.items():
 		if k[1] == '1':
 			v = v*weights[0]
@@ -111,13 +111,14 @@ while diffCdf(caf, daf)/diffCdf(cgf, dgf) > 0.0000000000000001:
 			v = v*weights[1]
 		ct[k] = v
 
+
 	#Updates current frequencies after weighting for age
-	caf = calcCaf(ct)
+	caf, cgf = calcCtFreq(ct)
 
 	#Calculates weights based on age
 	weights = calcWeights(caf, daf)
 
-	#Applies weights based on age and updates dictionary crosstab frequencies
+	#Applies weights based on age and updates crosstab frequencies
 	for k, v in ct.items():
 		if k[0] == 1:
 			v = v*weights[0]
@@ -135,9 +136,8 @@ while diffCdf(caf, daf)/diffCdf(cgf, dgf) > 0.0000000000000001:
 			v = v*weights[6]
 		ct[k] = v
 
-	#Updates current frequencies after weighting
-	cgf = calcCgf(ct)
-	caf = calcCaf(ct)
+	#Updates current frequencies after weighting for gender
+	caf, cgf = calcCtFreq(ct)
 
 	x = diffCdf(caf, daf)
 	y = diffCdf(cgf, dgf)
