@@ -1,7 +1,7 @@
 import pprint, math as m, pyodbc
 
 def calcFrequencies(responses):
-    '''Calculates frequencies for responses of a given variable'''
+    '''Calculates frequencies for responses in a given 'column' '''
     frequencies = {}
 
     for response in responses:
@@ -13,11 +13,11 @@ def calcFrequencies(responses):
     return frequencies
 
 def crosstabFrequencies(*responses):
-    '''Cross-tabulates responses for multiple variables, returns frequencies'''
+    '''Cross-tabulates responses for multiple 'columns', returns frequencies'''
     return calcFrequencies(list(zip(*responses)))
 
 def aggregateCrosstabFrequencies(crosstab, index):
-	'''Aggregates frequencies of responses for each variable in a crosstab'''
+	'''Aggregates frequencies of responses for each 'column' in a crosstab'''
 	frequencies = {}
 
 	for t, frequency in crosstab.items():
@@ -59,12 +59,12 @@ def calcWeights(currentFrequencies, desiredFrequencies):
 	return weights
 
 def applyWeights(crosstab, index):
-	'''applies weights to variable (given as index in tuple) in crosstab'''
+	'''applies weights to 'column'(given as index in tuple) in crosstab'''
 	for k, v in crosstab.items():
 		v = v*weights[int(k[index])-1]
 		currentCrosstab[k] = v
 
-#Creates list for each variable
+#Creates list for each 'column'
 genders = []
 ages = []
 ageBins = []
@@ -83,7 +83,7 @@ data = []
 for row in cursor:
 	data.append(row[6])
 
-#Separates data by variable and appends these to respective variable lists
+#Separates data by 'column' and appends these to respective 'column' lists
 for i in data:
 	x = i.split('&')
 
