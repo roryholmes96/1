@@ -112,7 +112,8 @@ actualCrosstab = crosstabFrequencies(ageBins, genders)
 currentCrosstab = crosstabFrequencies(ageBins, genders)
 
 #Pairs each 'column' with its index/position in the crosstab key tuple
-#This is so these variables can be used for various functions in the algorithm
+#This is so these variables can be used in various functions in the algorithm
+# i.e. crosstab in format {(age, gender): freq}
 ageIndex = 0
 genderIndex = 1
 
