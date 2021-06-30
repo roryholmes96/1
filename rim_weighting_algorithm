@@ -16,11 +16,11 @@ def crosstabFrequencies(*responses):
     '''Cross-tabulates responses for multiple 'columns', returns frequencies'''
     return calcFrequencies(list(zip(*responses)))
 
-def aggregateCrosstabFrequencies(crosstab, index):
+def aggregateCrosstabFrequencies(index):
 	'''Aggregates frequencies of responses for each 'column' in a crosstab'''
 	frequencies = {}
 
-	for t, frequency in crosstab.items():
+	for t, frequency in currentCrosstab.items():
 
 		if t[index] in frequencies.keys():
 			frequencies[t[index]] += frequency
@@ -58,9 +58,9 @@ def calcWeights(currentFrequencies, desiredFrequencies):
 
 	return weights
 
-def applyWeights(crosstab, index):
-	'''applies weights to 'column'(given as index in tuple) in crosstab'''
-	for k, v in crosstab.items():
+def applyWeights(index):
+	'''Applies weights to 'column'(index in tuple) in current crosstab'''
+	for k, v in currentCrosstab.items():
 		v = v*weights[int(k[index])-1]
 		currentCrosstab[k] = v
 
@@ -107,6 +107,7 @@ desiredGenderFrequencies = \
 {'1':700, '2':805}
 
 #Assigns actual and initial current crosstabulation based on actual frequencies
+#Crosstab is a dict with each age, gender pair as key and freq as value
 actualCrosstab = crosstabFrequencies(ageBins, genders)
 currentCrosstab = crosstabFrequencies(ageBins, genders)
 
@@ -115,11 +116,11 @@ currentCrosstab = crosstabFrequencies(ageBins, genders)
 ageIndex = 0
 genderIndex = 1
 
-#Assigns initial current frequencies
+#Assigns initial 'current frequencies'
 currentAgeFrequencies = \
-aggregateCrosstabFrequencies(currentCrosstab, ageIndex)
+aggregateCrosstabFrequencies(ageIndex)
 currentGenderFrequencies = \
-aggregateCrosstabFrequencies(currentCrosstab, genderIndex)
+aggregateCrosstabFrequencies(genderIndex)
 
 #Assigns initial total difference between actual and desired freq per case
 totalDifferencePerCase = \
@@ -130,35 +131,29 @@ calcDifferencePerCase(currentGenderFrequencies, desiredGenderFrequencies)
 iteration = 0
 while totalDifferencePerCase > 0.000000000000001:
 
-	#Updates current frequencies
-	currentAgeFrequencies = \
-	aggregateCrosstabFrequencies(currentCrosstab, ageIndex)
-	currentGenderFrequencies = \
-	aggregateCrosstabFrequencies(currentCrosstab, genderIndex)
-
 	#Calculates weights based on gender
 	weights = calcWeights(currentGenderFrequencies, desiredGenderFrequencies)
 
 	#Applies weights based on gender and updates crosstab frequencies
-	applyWeights(currentCrosstab, genderIndex)
+	applyWeights(genderIndex)
 
 	#Updates current frequencies after weighting for age
 	currentAgeFrequencies = \
-	aggregateCrosstabFrequencies(currentCrosstab, ageIndex)
+	aggregateCrosstabFrequencies(ageIndex)
 	currentGenderFrequencies = \
-	aggregateCrosstabFrequencies(currentCrosstab, genderIndex)
+	aggregateCrosstabFrequencies(genderIndex)
 
 	#Calculates weights based on age
 	weights = calcWeights(currentAgeFrequencies, desiredAgeFrequencies)
 
 	#Applies weights based on age and updates crosstab frequencies
-	applyWeights(currentCrosstab, ageIndex)
+	applyWeights(ageIndex)
 
 	#Updates current frequencies after weighting for gender
 	currentAgeFrequencies = \
-	aggregateCrosstabFrequencies(currentCrosstab, ageIndex)
+	aggregateCrosstabFrequencies(ageIndex)
 	currentGenderFrequencies = \
-	aggregateCrosstabFrequencies(currentCrosstab, genderIndex)
+	aggregateCrosstabFrequencies(genderIndex)
 
 	#Updates difference per case at end of iteration
 	totalDifferencePerCase = \
