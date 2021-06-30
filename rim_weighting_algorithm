@@ -59,10 +59,21 @@ def calcWeights(currentFrequencies, desiredFrequencies):
 	return weights
 
 def applyWeights(index):
-	'''Applies weights to 'column'(index in tuple) in current crosstab'''
+	'''applies weights to 'column'(index in tuple) in current crosstab'''
 	for k, v in currentCrosstab.items():
 		v = v*weights[int(k[index])-1]
 		currentCrosstab[k] = v
+
+class RimColumn:
+	rimColumns = []
+	index = 0
+	def __init__ (self, column, desiredFrequencies):
+		RimColumn.rimColumns.append(self)
+		self.index = RimColumn.index
+		RimColumn.index+=1
+		self.column = column
+		self.desiredFrequencies = desiredFrequencies
+		self.currentFrequencies = aggregateCrosstabFrequencies(self.index)
 
 #Creates list for each 'column'
 genders = []
@@ -99,7 +110,7 @@ for i in data:
 for i in range(len(ages)):
     ageBins.append(m.floor((ages[i]-1)/10))
 
-#Sets desired frequency distribution
+#Arbitrary desired frequency distributions
 desiredAgeFrequencies = \
 {'1':75, '2':400, '3':500, '4':300, '5':200, '6':29, '7':1}
 
@@ -107,59 +118,33 @@ desiredGenderFrequencies = \
 {'1':700, '2':805}
 
 #Assigns actual and initial current crosstabulation based on actual frequencies
-#Crosstab is a dict with each age, gender pair as key and freq as value
 actualCrosstab = crosstabFrequencies(ageBins, genders)
 currentCrosstab = crosstabFrequencies(ageBins, genders)
 
-#Pairs each 'column' with its index/position in the crosstab key tuple
-#This is so these variables can be used in various functions in the algorithm
-# i.e. crosstab in format {(age, gender): freq}
-ageIndex = 0
-genderIndex = 1
-
-#Assigns initial 'current frequencies'
-currentAgeFrequencies = \
-aggregateCrosstabFrequencies(ageIndex)
-currentGenderFrequencies = \
-aggregateCrosstabFrequencies(genderIndex)
+#Assigns column data and 
+ageColumn = RimColumn(ageBins, desiredAgeFrequencies)
+genderColumn = RimColumn(genders, desiredGenderFrequencies)
 
 #Assigns initial total difference between actual and desired freq per case
 totalDifferencePerCase = \
-calcDifferencePerCase(currentAgeFrequencies, desiredAgeFrequencies) + \
-calcDifferencePerCase(currentGenderFrequencies, desiredGenderFrequencies)
+calcDifferencePerCase(ageColumn.currentFrequencies, ageColumn.desiredFrequencies) + \
+calcDifferencePerCase(genderColumn.currentFrequencies, genderColumn.desiredFrequencies)
 
 # Rim-Weighting Algorithm
 iteration = 0
-while totalDifferencePerCase > 0.000000000000001:
+while totalDifferencePerCase > 0.000001:
 
-	#Calculates weights based on gender
-	weights = calcWeights(currentGenderFrequencies, desiredGenderFrequencies)
+	for column in RimColumn.rimColumns:
+		weights = calcWeights(column.currentFrequencies, column.desiredFrequencies)
+		applyWeights(column.index)
 
-	#Applies weights based on gender and updates crosstab frequencies
-	applyWeights(genderIndex)
-
-	#Updates current frequencies after weighting for age
-	currentAgeFrequencies = \
-	aggregateCrosstabFrequencies(ageIndex)
-	currentGenderFrequencies = \
-	aggregateCrosstabFrequencies(genderIndex)
-
-	#Calculates weights based on age
-	weights = calcWeights(currentAgeFrequencies, desiredAgeFrequencies)
-
-	#Applies weights based on age and updates crosstab frequencies
-	applyWeights(ageIndex)
-
-	#Updates current frequencies after weighting for gender
-	currentAgeFrequencies = \
-	aggregateCrosstabFrequencies(ageIndex)
-	currentGenderFrequencies = \
-	aggregateCrosstabFrequencies(genderIndex)
+		for column in RimColumn.rimColumns:
+			column.currentFrequencies = aggregateCrosstabFrequencies(column.index)
 
 	#Updates difference per case at end of iteration
 	totalDifferencePerCase = \
-	calcDifferencePerCase(currentAgeFrequencies, desiredAgeFrequencies) + \
-	calcDifferencePerCase(currentGenderFrequencies, desiredGenderFrequencies)
+	calcDifferencePerCase(ageColumn.currentFrequencies, ageColumn.desiredFrequencies) + \
+	calcDifferencePerCase(genderColumn.currentFrequencies, genderColumn.desiredFrequencies)
 
 	#Increases iteration and prints current iteration and difference per case
 	iteration +=1
