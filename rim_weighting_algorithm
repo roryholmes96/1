@@ -40,15 +40,15 @@ def frequenciesDifference(currentFrequencies, desiredFrequencies):
 	return totalDiff
 
 def calcDifferencePerCase(currentFrequencies1, desiredFrequencies1,\
- 		          currentFrequencies2, desiredFrequencies2):
+ 					      currentFrequencies2, desiredFrequencies2):
 	'''Calculates total difference between current and desired frequencies 
 	per case (this is used to check whether to perform another iteration)'''
 
 	x = frequenciesDifference(currentFrequencies1,\
-	                          desiredFrequencies1)
+							  desiredFrequencies1)
 
 	y = frequenciesDifference(currentFrequencies2,\
-			         desiredFrequencies2)
+							  desiredFrequencies2)
 
 	totalFrequenciesDifference = x+y
 	sampleSize = sum(actualCrosstab.values())
@@ -78,9 +78,9 @@ deodorantUses = []
 
 #Connects to SQL Server Database and retrieves data
 connection = pyodbc.connect('Driver={SQL Server};'
-			    'Server=.\sqlexpress;'
-			    'Database=Nivea;'
-			    'Trusted_connection=yes')
+					        'Server=.\sqlexpress;'
+					        'Database=Nivea;'
+					        'Trusted_connection=yes')
 
 cursor = connection.cursor()
 cursor.execute('SELECT * FROM Nivea.dbo.weighted_custom')
@@ -116,47 +116,59 @@ desiredGenderFrequencies = \
 actualCrosstab = crosstabFrequencies(ageBins, genders)
 currentCrosstab = crosstabFrequencies(ageBins, genders)
 
+#Pairs each variable column with its index position in the crosstab key tuple
+ageIndex = 0
+genderIndex = 1
+
 #Assigns initial current frequencies
-currentAgeFrequencies = aggregateCrosstabFrequencies(currentCrosstab, 0)
-currentGenderFrequencies = aggregateCrosstabFrequencies(currentCrosstab, 1)
+currentAgeFrequencies = \
+aggregateCrosstabFrequencies(currentCrosstab, ageIndex)
+currentGenderFrequencies = \
+aggregateCrosstabFrequencies(currentCrosstab, genderIndex)
 
 #Assigns initial total difference between actual and desired freq per case
 differencePerCase = \
 calcDifferencePerCase(currentAgeFrequencies, desiredAgeFrequencies, \
-		      currentGenderFrequencies, desiredGenderFrequencies)
+					  currentGenderFrequencies, desiredGenderFrequencies)
 
 # Rim-Weighting Algorithm
 iteration = 0
 while differencePerCase > 0.000000000000001:
 
 	#Updates current frequencies
-	currentAgeFrequencies = aggregateCrosstabFrequencies(currentCrosstab, 0)
-	currentGenderFrequencies = aggregateCrosstabFrequencies(currentCrosstab, 1)
+	currentAgeFrequencies = \
+	aggregateCrosstabFrequencies(currentCrosstab, ageIndex)
+	currentGenderFrequencies = \
+	aggregateCrosstabFrequencies(currentCrosstab, genderIndex)
 
 	#Calculates weights based on gender
 	weights = calcWeights(currentGenderFrequencies, desiredGenderFrequencies)
 
 	#Applies weights based on gender and updates crosstab frequencies
-	applyWeights(currentCrosstab, 1)
+	applyWeights(currentCrosstab, genderIndex)
 
 	#Updates current frequencies after weighting for age
-	currentAgeFrequencies = aggregateCrosstabFrequencies(currentCrosstab, 0)
-	currentGenderFrequencies = aggregateCrosstabFrequencies(currentCrosstab, 1)
+	currentAgeFrequencies = \
+	aggregateCrosstabFrequencies(currentCrosstab, ageIndex)
+	currentGenderFrequencies = \
+	aggregateCrosstabFrequencies(currentCrosstab, genderIndex)
 
 	#Calculates weights based on age
 	weights = calcWeights(currentAgeFrequencies, desiredAgeFrequencies)
 
 	#Applies weights based on age and updates crosstab frequencies
-	applyWeights(currentCrosstab, 0)
+	applyWeights(currentCrosstab, ageIndex)
 
 	#Updates current frequencies after weighting for gender
-	currentAgeFrequencies = aggregateCrosstabFrequencies(currentCrosstab, 0)
-	currentGenderFrequencies = aggregateCrosstabFrequencies(currentCrosstab, 1)
+	currentAgeFrequencies = \
+	aggregateCrosstabFrequencies(currentCrosstab, ageIndex)
+	currentGenderFrequencies = \
+	aggregateCrosstabFrequencies(currentCrosstab, genderIndex)
 
 	#Updates difference per case at end of iteration
 	differencePerCase = \
 	calcDifferencePerCase(currentAgeFrequencies, desiredAgeFrequencies, \
-		              currentGenderFrequencies, desiredGenderFrequencies)
+						  currentGenderFrequencies, desiredGenderFrequencies)
 
 	#Increases iteration and prints current iteration and difference per case
 	iteration +=1
