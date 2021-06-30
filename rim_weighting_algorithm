@@ -39,20 +39,14 @@ def frequenciesDifference(currentFrequencies, desiredFrequencies):
 
 	return totalDiff
 
-def calcDifferencePerCase(currentFrequencies1, desiredFrequencies1,\
- 					      currentFrequencies2, desiredFrequencies2):
+def calcDifferencePerCase(currentFrequencies, desiredFrequencies):
 	'''Calculates total difference between current and desired frequencies 
 	per case (this is used to check whether to perform another iteration)'''
 
-	x = frequenciesDifference(currentFrequencies1,\
-							  desiredFrequencies1)
+	difference = frequenciesDifference(currentFrequencies, desiredFrequencies)
 
-	y = frequenciesDifference(currentFrequencies2,\
-							  desiredFrequencies2)
-
-	totalFrequenciesDifference = x+y
 	sampleSize = sum(actualCrosstab.values())
-	return totalFrequenciesDifference / sampleSize
+	return difference / sampleSize
 
 def calcWeights(currentFrequencies, desiredFrequencies):
 	'''Calculates weight factors as df/cf quotient'''
@@ -116,7 +110,8 @@ desiredGenderFrequencies = \
 actualCrosstab = crosstabFrequencies(ageBins, genders)
 currentCrosstab = crosstabFrequencies(ageBins, genders)
 
-#Pairs each variable column with its index position in the crosstab key tuple
+#Pairs each 'column' with its index/position in the crosstab key tuple
+#This is so these variables can be used for various functions in the algorithm
 ageIndex = 0
 genderIndex = 1
 
@@ -127,13 +122,13 @@ currentGenderFrequencies = \
 aggregateCrosstabFrequencies(currentCrosstab, genderIndex)
 
 #Assigns initial total difference between actual and desired freq per case
-differencePerCase = \
-calcDifferencePerCase(currentAgeFrequencies, desiredAgeFrequencies, \
-					  currentGenderFrequencies, desiredGenderFrequencies)
+totalDifferencePerCase = \
+calcDifferencePerCase(currentAgeFrequencies, desiredAgeFrequencies) + \
+calcDifferencePerCase(currentGenderFrequencies, desiredGenderFrequencies)
 
 # Rim-Weighting Algorithm
 iteration = 0
-while differencePerCase > 0.000000000000001:
+while totalDifferencePerCase > 0.000000000000001:
 
 	#Updates current frequencies
 	currentAgeFrequencies = \
@@ -166,15 +161,15 @@ while differencePerCase > 0.000000000000001:
 	aggregateCrosstabFrequencies(currentCrosstab, genderIndex)
 
 	#Updates difference per case at end of iteration
-	differencePerCase = \
-	calcDifferencePerCase(currentAgeFrequencies, desiredAgeFrequencies, \
-						  currentGenderFrequencies, desiredGenderFrequencies)
+	totalDifferencePerCase = \
+	calcDifferencePerCase(currentAgeFrequencies, desiredAgeFrequencies) + \
+	calcDifferencePerCase(currentGenderFrequencies, desiredGenderFrequencies)
 
 	#Increases iteration and prints current iteration and difference per case
 	iteration +=1
 	print(f'iteration: {iteration} \n\
 	total difference per case between actual and desired frequencies:'\
-	f' {differencePerCase}')
+	f' {totalDifferencePerCase}')
 
 weights = calcWeights(actualCrosstab, currentCrosstab)
 crosstabWithWeights = dict(sorted(zip(actualCrosstab.keys(), weights)))
