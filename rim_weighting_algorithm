@@ -42,9 +42,7 @@ def frequenciesDifference(currentFrequencies, desiredFrequencies):
 def calcDifferencePerCase(currentFrequencies, desiredFrequencies):
 	'''Calculates total difference between current and desired frequencies 
 	per case (this is used to check whether to perform another iteration)'''
-
 	difference = frequenciesDifference(currentFrequencies, desiredFrequencies)
-
 	sampleSize = sum(actualCrosstab.values())
 	return difference / sampleSize
 
@@ -67,15 +65,17 @@ def applyWeights(index):
 class RimColumn():
 	''' Represents columns to be used in RIM Weighting'''
 	numOfRimColumns = 0
+
 	def __init__ (self, column, desiredFrequencies):
 		rimColumns.append(self)
 		columns.append(column)
 		self.index = RimColumn.numOfRimColumns
-		RimColumn.numOfRimColumns +=1
 		self.column = column
 		self.actualFrequencies = calcFrequencies(column)
 		self.currentFrequencies = self.actualFrequencies
 		self.desiredFrequencies = desiredFrequencies
+		RimColumn.numOfRimColumns +=1
+
 rimColumns = []
 columns = []
 
@@ -131,10 +131,10 @@ currentCrosstab = crosstab(*columns)
 
 #Assigns initial total difference between actual and desired freq per 
 totalDiffPerCase = 0
-for column in rimColumns:
+for rimColumn in rimColumns:
 	totalDiffPerCase += \
-	calcDifferencePerCase(column.currentFrequencies,\
-						  column.desiredFrequencies)
+	calcDifferencePerCase(rimColumn.currentFrequencies,\
+						  rimColumn.desiredFrequencies)
 
 # Rim-Weighting Algorithm
 iteration = 0
