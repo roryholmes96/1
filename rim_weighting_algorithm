@@ -136,7 +136,7 @@ for rimColumn in rimColumns:
 	calcDifferencePerCase(rimColumn.currentFrequencies,\
 						  rimColumn.desiredFrequencies)
 
-# Rim-Weighting Algorithm
+# RIM-Weighting Algorithm
 iteration = 0
 while totalDiffPerCase > 0.00000000000000001:
 	totalDiffPerCase = 0
