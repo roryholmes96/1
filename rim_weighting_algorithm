@@ -1,7 +1,7 @@
 import pprint, math as m, pyodbc
 
 def calcFrequencies(responses):
-    '''Calculates frequencies for responses in a given 'column' '''
+'''Calculates frequencies for responses in a given 'column' '''
     frequencies = {}
 
     for response in responses:
@@ -13,11 +13,12 @@ def calcFrequencies(responses):
     return frequencies
 
 def crosstabFrequencies(*responses):
-    '''Cross-tabulates responses for multiple 'columns', returns frequencies'''
+'''Cross-tabulates responses for multiple 'columns', returns frequencies'''
     return calcFrequencies(list(zip(*responses)))
 
 def aggregateCrosstabFrequencies(index):
-	'''Aggregates frequencies of responses for each 'column' in a crosstab'''
+'''Aggregates frequencies of responses for each 'column' in a crosstab. Column
+in this case is the index positon in the crosstab key tuple'''
 	frequencies = {}
 
 	for t, frequency in currentCrosstab.items():
@@ -30,7 +31,7 @@ def aggregateCrosstabFrequencies(index):
 	return dict(sorted(frequencies.items()))
 
 def frequenciesDifference(currentFrequencies, desiredFrequencies):
-	'''Calculates total difference between current and desired frequencies'''
+'''Calculates total difference between current and desired frequencies'''
 	totalDiff = 0
 
 	for currentFrequency, desiredFrequency in\
@@ -40,8 +41,8 @@ def frequenciesDifference(currentFrequencies, desiredFrequencies):
 	return totalDiff
 
 def calcDifferencePerCase(currentFrequencies, desiredFrequencies):
-	'''Calculates total difference between current and desired frequencies 
-	per case (this is used to check whether to perform another iteration)'''
+'''Calculates total difference between current and desired frequencies per case 
+(this is used to check whether to perform another iteration)'''
 
 	difference = frequenciesDifference(currentFrequencies, desiredFrequencies)
 
@@ -49,7 +50,7 @@ def calcDifferencePerCase(currentFrequencies, desiredFrequencies):
 	return difference / sampleSize
 
 def calcWeights(currentFrequencies, desiredFrequencies):
-	'''Calculates weight factors as df/cf quotient'''
+'''Calculates weight factors as desiredFrequency/currentFrequency quotient'''
 	weights = []
 
 	for currentFrequency, desiredFrequency in\
@@ -59,12 +60,14 @@ def calcWeights(currentFrequencies, desiredFrequencies):
 	return weights
 
 def applyWeights(index):
-	'''applies weights to 'column'(index in tuple) in current crosstab'''
+'''Applies weights to 'column'(index in tuple) in current crosstab'''
 	for k, v in currentCrosstab.items():
 		v = v*weights[int(k[index])-1]
 		currentCrosstab[k] = v
 
 class RimColumn:
+''' Represents columns to be used in RIM Weighting. Contains the column of
+responses, the actual frequencies, the desired frequencies and index '''
 	rimColumns = []
 	index = 0
 	def __init__ (self, column, desiredFrequencies):
@@ -118,41 +121,53 @@ desiredGenderFrequencies = \
 {'1':700, '2':805}
 
 #Assigns actual and initial current crosstabulation based on actual frequencies
-actualCrosstab = crosstabFrequencies(ageBins, genders)
 currentCrosstab = crosstabFrequencies(ageBins, genders)
+actualCrosstab = crosstabFrequencies(ageBins, genders)
 
-#Assigns column data and 
-ageColumn = RimColumn(ageBins, desiredAgeFrequencies)
-genderColumn = RimColumn(genders, desiredGenderFrequencies)
+#Creates 'RimColumns' for each 'column' of data
+#NEED TO CREATE RIMCOLUMNS IN SAME ORDER AS CROSSTAB ORDER
+ageRimColumn = RimColumn(ageBins, desiredAgeFrequencies)
+genderRimColumn = RimColumn(genders, desiredGenderFrequencies)
 
-#Assigns initial total difference between actual and desired freq per case
-totalDifferencePerCase = \
-calcDifferencePerCase(ageColumn.currentFrequencies, ageColumn.desiredFrequencies) + \
-calcDifferencePerCase(genderColumn.currentFrequencies, genderColumn.desiredFrequencies)
+#Assigns initial total diff between actual and desired frequencies per case
+totalDifferencePerCase = 0
+for column in RimColumn.rimColumns:
+	totalDifferencePerCase += \
+	calcDifferencePerCase(column.currentFrequencies,\
+						  column.desiredFrequencies)
 
 # Rim-Weighting Algorithm
 iteration = 0
-while totalDifferencePerCase > 0.000001:
+while totalDifferencePerCase > 0.00000000000000001:
+	totalDifferencePerCase = 0
 
-	for column in RimColumn.rimColumns:
-		weights = calcWeights(column.currentFrequencies, column.desiredFrequencies)
-		applyWeights(column.index)
+	#Calculates and applies weights to crosstab frequencies
+	for rimColumn in RimColumn.rimColumns:
+		weights = \
+		calcWeights(rimColumn.currentFrequencies,rimColumn.desiredFrequencies)
 
-		for column in RimColumn.rimColumns:
-			column.currentFrequencies = aggregateCrosstabFrequencies(column.index)
+		applyWeights(rimColumn.index)
 
-	#Updates difference per case at end of iteration
-	totalDifferencePerCase = \
-	calcDifferencePerCase(ageColumn.currentFrequencies, ageColumn.desiredFrequencies) + \
-	calcDifferencePerCase(genderColumn.currentFrequencies, genderColumn.desiredFrequencies)
+		#Updates current freq to reflect newly weighted crosstab freq
+		for rimColumn in RimColumn.rimColumns:
+			rimColumn.currentFrequencies =\
+			aggregateCrosstabFrequencies(rimColumn.index)
 
+	#Calculates total difference per case at end of iteration
+	for rimColumn in RimColumn.rimColumns:
+		totalDifferencePerCase += \
+		calcDifferencePerCase(rimColumn.currentFrequencies,\
+							  rimColumn.desiredFrequencies)
+		
 	#Increases iteration and prints current iteration and difference per case
 	iteration +=1
-	print(f'iteration: {iteration} \n\
-	total difference per case between actual and desired frequencies:'\
-	f' {totalDifferencePerCase}')
+	print(f'\niteration: {iteration} \ntotal difference per case between '\
+		  f'actual and desired frequencies: {totalDifferencePerCase}')
 
+#Caclulates weights based on difference between actual and current crosstab freq
 weights = calcWeights(actualCrosstab, currentCrosstab)
+
+#Prints weights paired with corresponding crosstab key
 crosstabWithWeights = dict(sorted(zip(actualCrosstab.keys(), weights)))
 print(f'\nWeights calculated after {iteration} iterations:')
 pprint.pprint(crosstabWithWeights)
