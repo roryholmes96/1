@@ -121,9 +121,14 @@ desiredAgeFrequencies = \
 desiredGenderFrequencies = \
 {'1':700, '2':805}
 
+desiredDeoderantUseFrequencies = \
+{'1': 400, '2': 662, '3':413, '4':30}
+
+
 #Creates Rim Columns for Columns to be used in rim weighting algorithm 
 ageRimColumn = RimColumn(ageBins, desiredAgeFrequencies)
 genderRimColumn = RimColumn(genders, desiredGenderFrequencies)
+deodorantUsesRimColumn = RimColumn(deodorantUses, desiredDeoderantUseFrequencies)
 
 #Assigns actual and an initial current crosstab
 actualCrosstab = crosstab(*columns)
