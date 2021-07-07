@@ -59,25 +59,19 @@ def calcWeights(currentFrequencies, desiredFrequencies):
 def applyWeights(index):
 	'''applies weights to 'column'(index in tuple) in current crosstab'''
 	for k, v in currentCrosstab.items():
-		v = v*weights[int(k[index])-1]
+		'''weightIndex is the actual response value -1 as index starts at 0'''
+		weightIndex = int(k[index])-1 
+
+		v = v*weights[weightIndex]
 		currentCrosstab[k] = v
 
 class RimColumn():
 	''' Represents columns to be used in RIM Weighting'''
-	numOfRimColumns = 0
-
-	def __init__ (self, column, desiredFrequencies):
-		rimColumns.append(self)
-		columns.append(column)
-		self.index = RimColumn.numOfRimColumns
-		self.column = column
+	def __init__ (self, column, desiredFrequencies, index):
+		self.index = index
 		self.actualFrequencies = calcFrequencies(column)
 		self.currentFrequencies = self.actualFrequencies
 		self.desiredFrequencies = desiredFrequencies
-		RimColumn.numOfRimColumns +=1
-
-rimColumns = []
-columns = []
 
 #Connects to SQL Server Database and retrieves data
 connection = pyodbc.connect('Driver={SQL Server};'
@@ -121,18 +115,26 @@ desiredAgeFrequencies = \
 desiredGenderFrequencies = \
 {'1':700, '2':805}
 
-desiredDeoderantUseFrequencies = \
-{'1': 400, '2': 662, '3':413, '4':30}
+#Creates columns list which contains each column of responses and desired frequencies list
+columns = [ageBins, genders]
+desiredFrequencies = [desiredAgeFrequencies, desiredGenderFrequencies]
 
+#creates index list which contains an index (to be used in various functions) for each item in columns list
+index = []
+for t in list(enumerate(columns)):
+	index.append(t[0])
 
-#Creates Rim Columns for Columns to be used in rim weighting algorithm 
-ageRimColumn = RimColumn(ageBins, desiredAgeFrequencies)
-genderRimColumn = RimColumn(genders, desiredGenderFrequencies)
-deodorantUsesRimColumn = RimColumn(deodorantUses, desiredDeoderantUseFrequencies)
+#Creates a structure to be used in loop which assigns objects to Rim Column class
+structure = list(zip(columns, desiredFrequencies, index))
 
-#Assigns actual and an initial current crosstab
+#Assigns actual and an initial current crosstab.
 actualCrosstab = crosstab(*columns)
 currentCrosstab = crosstab(*columns)
+
+#Creates Rim Columns to be used in rim-weighting algorithm
+rimColumns = []
+for column, desiredFrequencies, index in structure:
+	rimColumns.append(RimColumn(column, desiredFrequencies, index))
 
 #Assigns initial total difference between actual and desired freq per 
 totalDiffPerCase = 0
