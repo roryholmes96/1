@@ -59,10 +59,7 @@ def calcWeights(currentFrequencies, desiredFrequencies):
 def applyWeights(index):
 	'''applies weights to 'column'(index in tuple) in current crosstab'''
 	for k, v in currentCrosstab.items():
-		'''weightIndex is the actual response value -1 as index starts at 0'''
-		weightIndex = int(k[index])-1 
-
-		v = v*weights[weightIndex]
+		v = v*weights[int(k[index])-1]
 		currentCrosstab[k] = v
 
 class RimColumn():
@@ -119,12 +116,13 @@ desiredGenderFrequencies = \
 columns = [ageBins, genders]
 desiredFrequencies = [desiredAgeFrequencies, desiredGenderFrequencies]
 
-#creates index list which contains an index (to be used in various functions) for each item in columns list
+#Creates index list which contains the index (to be used in various functions) for each item in columns list
 index = []
 for t in list(enumerate(columns)):
 	index.append(t[0])
 
 #Creates a structure to be used in loop which assigns objects to Rim Column class
+#Item in structure is a tuple containing survey variable's column of data, the desired frequency distribution for that variable, and its index position (this is the same in both this structure and the crosstab)
 structure = list(zip(columns, desiredFrequencies, index))
 
 #Assigns actual and an initial current crosstab.
