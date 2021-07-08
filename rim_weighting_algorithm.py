@@ -156,16 +156,16 @@ for t in list(enumerate(surveyVariableResponses)):
 #index position (this is the same in both this structure and the crosstab)
 structure = list(zip(surveyVariableResponses, desiredFrequencies, index))
 
+#Assigns actual and an initial current crosstab
+actualCrosstab = crosstab(*surveyVariableResponses)
+currentCrosstab = crosstab(*surveyVariableResponses)
+
 #Creates a RimVariable instance for each variable to be used in the
 #rim-weighting algorithm and appends it to rimVariables list
 rimVariables = []
 for surveyVariableResponses, desiredFrequencies, index in structure:
 	rimVariable =RimVariable(surveyVariableResponses, desiredFrequencies, index)
 	rimVariables.append(rimVariable)
-
-#Assigns actual and an initial current crosstab
-actualCrosstab = crosstab(*surveyVariableResponses)
-currentCrosstab = crosstab(*surveyVariableResponses)
 
 #Assigns initial total difference between actual and desired freq per case
 totalDiffPerCase = 0
@@ -196,7 +196,7 @@ while totalDiffPerCase > 0.00000000000000001:
 	for rimVariable in rimVariables:
 		totalDiffPerCase += \
 		diffPerCase(rimVariable.currentFrequencies,\
-							  rimVariable.desiredFrequencies)
+					rimVariable.desiredFrequencies)
 		
 	#Increases iteration and prints current iteration and difference per case
 	iteration +=1
