@@ -12,7 +12,7 @@ def calcFrequencies(responses):
         else:
             frequencies[response] = 1
 
-    return frequencies
+    return dict(sorted(frequencies.items()))
 
 def crosstab(*responses):
 	'''Crosstabs the lists of responses for multiple survey variables. The
@@ -69,29 +69,36 @@ def calcWeights(currentFrequencies, desiredFrequencies):
 
 	return weights
 
-def applyWeights(index):
+def applyWeights(structureIndex, responseIndexes):
 	'''Applies weights to the (current) frequencies of a given variable in the
 	   current crosstab (i.e. the crosstab after current iteration of 
-	   weighting). The index passed as an argument denotes the position
-	   of the survey  variable in the current crosstab's key tuple. For each 
-	   item in the crosstab, this formula retrieves the value of the response 
-	   (e.g. 2 for gender 2). It then uses this value minus 1 as the index for
-	   the corresponding weight in the weights list. This is because there is a
-	   weight for each possible reponse in the weights list stored in order. The
-	   minus 1 is because the index starts at 0. (e.g. the weight for gender 2 
-	   is stored in index 1 in the weights list)
+	   weighting). The structureIndex passed as an argument denotes the 
+	   position of the survey  variable in the current crosstab's key tuple. For 
+	   each item in the crosstab, this formula retrieves the value of the 
+	   response (e.g. 78 for region 78). It then uses this value to get that 
+	   response's index position in the ordered set of possible responses i.e. 
+	   (0 if 78 is the lowest value in the set of region responses). This index 
+	   position is retrieved from responseIndexes; a dictionary with each 
+	   possible response as a key, and it's index as a value. This response
+	   index is then used to identify which values (frequencies) to apply which
+	   weights to in the current crosstab
 	'''
 	for k, v in currentCrosstab.items():
-		v = v*weights[int(k[index])-1]
+		response = k[structureIndex]
+		responseIndex = responseIndexes[response]
+		v = v*weights[responseIndex]
 		currentCrosstab[k] = v
 
 class RimVariable():
 	''' Represents survey variables to be used in RIM Weighting'''
-	def __init__ (self, responses, desiredFrequencies, index):
-		self.index = index
-		self.actualFrequencies = calcFrequencies(surveyVariableResponses)
+	def __init__ (self, responses, desiredFrequencies, structureIndex):
+		self.actualFrequencies = calcFrequencies(responses)
 		self.currentFrequencies = self.actualFrequencies
-		self.desiredFrequencies = desiredFrequencies
+		self.desiredFrequencies = dict(sorted(desiredFrequencies.items()))
+		self.structureIndex = structureIndex
+		self.responseIndexes = dict((v,k) for k,v in \
+							   dict(enumerate(self.actualFrequencies)).items())
+
 
 #Connects to SQL Server Database and retrieves data
 connection = pyodbc.connect('Driver={SQL Server};'
@@ -167,7 +174,8 @@ for surveyVariableResponses, desiredFrequencies, index in structure:
 	rimVariable =RimVariable(surveyVariableResponses, desiredFrequencies, index)
 	rimVariables.append(rimVariable)
 
-#Assigns initial total difference between actual and desired freq per case
+#Assigns initial total difference between actual and desired freq per case for 
+#all survey variables. i.e the sum of totalDiffPerCase for each survey variable
 totalDiffPerCase = 0
 for rimVariable in rimVariables:
 	totalDiffPerCase += \
@@ -185,12 +193,12 @@ while totalDiffPerCase > 0.00000000000000001:
 		calcWeights(rimVariable.currentFrequencies,\
 					rimVariable.desiredFrequencies)
 
-		applyWeights(rimVariable.index)
+		applyWeights(rimVariable.structureIndex, rimVariable.responseIndexes)
 
 		#Updates current freq to reflect newly weighted crosstab freq
 		for rimVariable in rimVariables:
 			rimVariable.currentFrequencies =\
-			aggregateCrosstabFrequencies(rimVariable.index)
+			aggregateCrosstabFrequencies(rimVariable.structureIndex)
 
 	#Calculates total difference per case at end of iteration
 	for rimVariable in rimVariables:
