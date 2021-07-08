@@ -78,10 +78,11 @@ def applyWeights(structureIndex, responseIndexes):
 	   response (e.g. 78 for region 78). It then uses this value to get that 
 	   response's index position in the ordered set of possible responses i.e. 
 	   (0 if 78 is the lowest value in the set of region responses). This index 
-	   position is retrieved from responseIndexes; a dictionary with each 
-	   possible response as a key, and it's index as a value. This response
-	   index is then used to identify which values (frequencies) to apply which
-	   weights to in the current crosstab
+	   position is retrieved from the responseIndexes passed as an argument; a 
+	   dictionary with each possible response for a variable as keys, and it's 
+	   index as the corresponding value. This response index is then used to
+	   identify which values (frequencies) to apply which weights to in the 
+	   current crosstab
 	'''
 	for k, v in currentCrosstab.items():
 		response = k[structureIndex]
@@ -98,7 +99,6 @@ class RimVariable():
 		self.structureIndex = structureIndex
 		self.responseIndexes = dict((v,k) for k,v in \
 							   dict(enumerate(self.actualFrequencies)).items())
-
 
 #Connects to SQL Server Database and retrieves data
 connection = pyodbc.connect('Driver={SQL Server};'
