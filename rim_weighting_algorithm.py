@@ -184,7 +184,7 @@ for rimVariable in rimVariables:
 
 # RIM-Weighting Algorithm
 iteration = 0
-while totalDiffPerCase > 0.00000000000000001:
+while totalDiffPerCase > 0.00000000000000001 and iteration < 50:
 	totalDiffPerCase = 0
 
 	#Calculates and applies weights to crosstab frequencies
