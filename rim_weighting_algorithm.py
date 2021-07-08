@@ -69,7 +69,7 @@ def calcWeights(currentFrequencies, desiredFrequencies):
 
 	return weights
 
-def applyWeights(structureIndex, responseIndexes):
+def applyWeights(crosstabIndex, responseIndexes):
 	'''Applies weights to the (current) frequencies of a given variable in the
 	   current crosstab (i.e. the crosstab after current iteration of 
 	   weighting). The structureIndex passed as an argument denotes the 
@@ -85,18 +85,18 @@ def applyWeights(structureIndex, responseIndexes):
 	   current crosstab
 	'''
 	for k, v in currentCrosstab.items():
-		response = k[structureIndex]
+		response = k[crosstabIndex]
 		responseIndex = responseIndexes[response]
 		v = v*weights[responseIndex]
 		currentCrosstab[k] = v
 
 class RimVariable():
 	''' Represents survey variables to be used in RIM Weighting'''
-	def __init__ (self, responses, desiredFrequencies, structureIndex):
+	def __init__ (self, responses, desiredFrequencies, crosstabIndex):
 		self.actualFrequencies = calcFrequencies(responses)
 		self.currentFrequencies = self.actualFrequencies
 		self.desiredFrequencies = dict(sorted(desiredFrequencies.items()))
-		self.structureIndex = structureIndex
+		self.crosstabIndex = crosstabIndex
 		self.responseIndexes = dict((v,k) for k,v in \
 							   dict(enumerate(self.actualFrequencies)).items())
 
@@ -143,35 +143,40 @@ desiredAgeFrequencies = \
 desiredGenderFrequencies = \
 {'1':700, '2':805}
 
-#Creates list which contains the list of responses for each survey variable to
+#Creates list which contains the lists of responses for each survey variable to
 #be used in rim-weighting
 surveyVariableResponses = [ageResponsesBins, genderResponses]
 
-#Creates list which contains the frequency distribution dictonary for each 
+#Creates list which contains the frequency distribution dictonaries for each 
 #survey variable to be used in rim-weightin
 desiredFrequencies = [desiredAgeFrequencies, desiredGenderFrequencies]
 
-#Creates index list which contains the index (to be used in various functions) 
-#for each item in surveyVariableResponses list
-index = []
+#Assigns actual and an initial current crosstab. 
+actualCrosstab = crosstab(*surveyVariableResponses)
+currentCrosstab = crosstab(*surveyVariableResponses)
+
+#Creates crosstabIndexes list which contains the lists of crosstabIndexes for 
+#each item in surveyVariableResponses list. crosstabIndexes are the position of 
+#a variable's corresponding response in the crosstab key touple. i.e. if the
+#crosstab is in the format {(genderResponse, ageResponse):frequency}, the 
+#crosstab index  is 0 for genderResponses and 1 for ageResponses 
+crosstabIndexes = []
 for t in list(enumerate(surveyVariableResponses)):
-	index.append(t[0])
+	crosstabIndexes.append(t[0])
 
 #Creates a structure to be used in loop which assigns objects to RimVariable
 #class. Each item in the structure is a tuple containing survey variable's list
 #of responses, the desired frequency distribution for that variable, and its 
-#index position (this is the same in both this structure and the crosstab)
-structure = list(zip(surveyVariableResponses, desiredFrequencies, index))
-
-#Assigns actual and an initial current crosstab
-actualCrosstab = crosstab(*surveyVariableResponses)
-currentCrosstab = crosstab(*surveyVariableResponses)
+#crosstabIndex
+structure = list(zip(surveyVariableResponses, desiredFrequencies,\
+					 crosstabIndexes))
 
 #Creates a RimVariable instance for each variable to be used in the
 #rim-weighting algorithm and appends it to rimVariables list
 rimVariables = []
-for surveyVariableResponses, desiredFrequencies, index in structure:
-	rimVariable =RimVariable(surveyVariableResponses, desiredFrequencies, index)
+for surveyVariableResponses, desiredFrequencies, crosstabIndex in structure:
+	rimVariable = RimVariable(surveyVariableResponses, desiredFrequencies,\
+							  crosstabIndex)
 	rimVariables.append(rimVariable)
 
 #Assigns initial total difference between actual and desired freq per case for 
@@ -193,12 +198,12 @@ while totalDiffPerCase > 0.00000000000000001 and iteration < 50:
 		calcWeights(rimVariable.currentFrequencies,\
 					rimVariable.desiredFrequencies)
 
-		applyWeights(rimVariable.structureIndex, rimVariable.responseIndexes)
+		applyWeights(rimVariable.crosstabIndex, rimVariable.responseIndexes)
 
 		#Updates current freq to reflect newly weighted crosstab freq
 		for rimVariable in rimVariables:
 			rimVariable.currentFrequencies =\
-			aggregateCrosstabFrequencies(rimVariable.structureIndex)
+			aggregateCrosstabFrequencies(rimVariable.crosstabIndex)
 
 	#Calculates total difference per case at end of iteration
 	for rimVariable in rimVariables:
