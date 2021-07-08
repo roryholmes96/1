@@ -1,8 +1,8 @@
 import pprint, math as m, pyodbc
 
 def calcFrequencies(responses):
-    '''Calculates the frequencies for each possible responses in a survey 
-       variable's list of responses
+    '''Calculates the frequencies for each possible response in a survey 
+       variable's list of responses.
     '''
     frequencies = {}
 
@@ -16,13 +16,13 @@ def calcFrequencies(responses):
 
 def crosstab(*responses):
 	'''Crosstabs the lists of responses for multiple survey variables. The
-	   crosstab is a dictionary where there is a key for each possible 
-	   combination of responses with the frequency of cases who responded this 
-	   way as the value.
+	   crosstab is a dictionary in which there is a key for each possible 
+	   combination of responses, with the frequency of respondents who responded
+	   in that combination as the value.
 	'''
 	return calcFrequencies(list(zip(*responses)))
 
-def aggregateCrosstabFrequencies(index):
+def aggregateCrosstabFrequencies(crosstabIndex):
 	'''Aggregates the frequencies of responses for each survey variable in a 
 	   crosstab.
 	'''
@@ -30,17 +30,17 @@ def aggregateCrosstabFrequencies(index):
 
 	for t, frequency in currentCrosstab.items():
 
-		if t[index] in frequencies.keys():
-			frequencies[t[index]] += frequency
+		if t[crosstabIndex] in frequencies.keys():
+			frequencies[t[crosstabIndex]] += frequency
 		else:
-			frequencies[t[index]] = frequency
+			frequencies[t[crosstabIndex]] = frequency
 
 	return dict(sorted(frequencies.items()))
 
 def frequenciesDiff(currentFrequencies, desiredFrequencies):
 	'''Calculates the difference between current frequencies (i.e. the 
 	   frequencies after current iteration of weighting) and desired frequencies 
-	   for each possible response in a survey variable's responses
+	   for each possible response in a survey variable's responses.
 	'''
 	totalDiff = 0
 
@@ -53,14 +53,14 @@ def frequenciesDiff(currentFrequencies, desiredFrequencies):
 def diffPerCase(currentFrequencies, desiredFrequencies):
 	'''Calculates the total difference between current and desired frequencies 
 	   for a given survey variable, divided by the number of respondents 
-	   (this is used to check whether to perform another iteration)
+	   (this is used to check whether to perform another iteration).
 	'''
 	difference = frequenciesDiff(currentFrequencies, desiredFrequencies)
 	sampleSize = sum(actualCrosstab.values())
 	return difference / sampleSize
 
 def calcWeights(currentFrequencies, desiredFrequencies):
-	'''Calculates weights as desiredFrequencies/currentFrequencies quotient '''
+	'''Calculates weights as desiredFrequencies/currentFrequencies quotient. '''
 	weights = []
 
 	for currentFrequency, desiredFrequency in\
@@ -73,16 +73,16 @@ def applyWeights(crosstabIndex, responseIndexes):
 	'''Applies weights to the (current) frequencies of a given variable in the
 	   current crosstab (i.e. the crosstab after current iteration of 
 	   weighting). The structureIndex passed as an argument denotes the 
-	   position of the survey  variable in the current crosstab's key tuple. For 
+	   position of the survey variable in the current crosstab's key tuple. For 
 	   each item in the crosstab, this formula retrieves the value of the 
-	   response (e.g. 78 for region 78). It then uses this value to get that 
-	   response's index position in the ordered set of possible responses i.e. 
-	   (0 if 78 is the lowest value in the set of region responses). This index 
-	   position is retrieved from the responseIndexes passed as an argument; a 
-	   dictionary with each possible response for a variable as keys, and it's 
-	   index as the corresponding value. This response index is then used to
-	   identify which values (frequencies) to apply which weights to in the 
-	   current crosstab
+	   response (e.g. 78 for region 78, or 2 for gender 2). It then uses this 
+	   value to get that response's index position in the ordered set of 
+	   possible responses i.e. (0 if 78 is the lowest value in the set of region 
+	   responses). This index position is retrieved from the responseIndexes
+	   passed as an argument; a dictionary with each possible response for a 
+	   variable as keys, and it's index as the corresponding value. This 
+	   response index is then used to identify which values (frequencies) to 
+	   apply which weights to in the current crosstab.
 	'''
 	for k, v in currentCrosstab.items():
 		response = k[crosstabIndex]
@@ -148,10 +148,10 @@ desiredGenderFrequencies = \
 surveyVariableResponses = [ageResponsesBins, genderResponses]
 
 #Creates list which contains the frequency distribution dictonaries for each 
-#survey variable to be used in rim-weightin
+#survey variable to be used in rim-weighting
 desiredFrequencies = [desiredAgeFrequencies, desiredGenderFrequencies]
 
-#Assigns actual and an initial current crosstab. 
+#Assigns actual and an initial current crosstab 
 actualCrosstab = crosstab(*surveyVariableResponses)
 currentCrosstab = crosstab(*surveyVariableResponses)
 
