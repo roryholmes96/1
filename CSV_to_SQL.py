@@ -1,17 +1,16 @@
-file1 = r'C:\Users\44797\Downloads\PokerStars Tracker UK Wave 100_21070606.csv'
-file2 = r'C:\Users\44797\OneDrive\Documents\pokerstars.csv'
+filename = r'C:\Users\44797\Downloads\PokerStars Tracker UK Wave 100_21070606.csv'
 
 import csv
 import pyodbc
 
-with open(file1) as f:
+with open(filename) as f:
     reader = csv.reader(f)
     headers = next(reader)
     reader = list(reader)
 
     connection = pyodbc.connect('Driver={SQL Server};'
 					        'Server=.\sqlexpress;'
-					        'Database= xxxxx;'
+					        'Database=Pokerstars;'
 					        'Trusted_connection=yes')
 
     try:
@@ -26,7 +25,7 @@ with open(file1) as f:
 	    		else:
 	    			s+=(f'&{x}={y}')
 	    	try:
-	    		SQL_insert_query = """INSERT INTO xxxxx (xxxxx) VALUES ('%s') """ % s
+	    		SQL_insert_query = """INSERT INTO pokerstars (Data) VALUES ('%s') """ % s
 
 	    		cursor = connection.cursor()
 	    		cursor.execute(SQL_insert_query)
