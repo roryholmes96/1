@@ -3,7 +3,7 @@ filename = r'C:\Users\44797\Downloads\PokerStars Tracker UK Wave 100_21070606.cs
 import csv
 import pyodbc
 
-with open(filename) as f:
+with open(filename,encoding='utf-8-sig') as f:
     reader = csv.reader(f)
     headers = next(reader)
     reader = list(reader)
@@ -12,7 +12,6 @@ with open(filename) as f:
 					        'Server=.\sqlexpress;'
 					        'Database=Pokerstars;'
 					        'Trusted_connection=yes')
-
     try:
 	    for i in range(9999999999999999999999):
 	    	a=list(zip(headers, reader[i]))
@@ -24,6 +23,7 @@ with open(filename) as f:
 	    			field +=1
 	    		else:
 	    			s+=(f'&{x}={y}')
+
 	    	try:
 	    		SQL_insert_query = """INSERT INTO pokerstars (Data) VALUES ('%s') """ % s
 
@@ -35,5 +35,6 @@ with open(filename) as f:
 
 	    	except pyodbc.Error as error:
 	    		print("Failed to insert record into table {}".format(error))
-	except IndexError as error:
-		print('No more rows left to insert')
+
+    except IndexError as error:
+	    print('No more rows left to insert')
