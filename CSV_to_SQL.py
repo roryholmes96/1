@@ -14,27 +14,27 @@ with open(filename,encoding='utf-8-sig') as f:
 					        'Trusted_connection=yes')
     try:
 	    for i in range(9999999999999999999999):
-	    	a=list(zip(headers, reader[i]))
-	    	s = ''
+	    	varResPairs=list(zip(headers, reader[i]))
+	    	rowString = ''
 	    	field = 1
-	    	for x,y in a:
+	    	for variable, response in varResPairs:
 	    		if field == 1:
-	    			s+=(f'{x}={y}')
+	    			rowString+=(f'{variable}={response}')
 	    			field +=1
 	    		else:
-	    			s+=(f'&{x}={y}')
+	    			rowString+=(f'&{variable}={response}')
 
 	    	try:
-	    		SQL_insert_query = """INSERT INTO pokerstars (Data) VALUES ('%s') """ % s
+	    		SQL_insert_query = """INSERT INTO pokerstars (Data) VALUES ('%s') """ % rowString
 
 	    		cursor = connection.cursor()
 	    		cursor.execute(SQL_insert_query)
 	    		connection.commit()
-	    		print(cursor.rowcount, "Record inserted successfully into table")
+	    		print(cursor.rowcount, "Row inserted successfully into table")
 	    		cursor.close()
 
 	    	except pyodbc.Error as error:
-	    		print("Failed to insert record into table {}".format(error))
+	    		print("Failed to insert row into table {}".format(error))
 
     except IndexError as error:
 	    print('No more rows left to insert')
