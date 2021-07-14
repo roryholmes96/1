@@ -3,7 +3,7 @@ some part of data from SQL, converts it to CSV format and returns this as a
 string. This program retrieves the strings in parallel and then writes them to 
 a CSV file.'''
 
-#Modifiabe Inputs and paramaters
+#Modifiable Inputs and paramaters
 numberOfThreads = 20
 headersFile = 'pokerstars_headers.csv'
 newFile = 'pokerstars_data.csv'
@@ -16,7 +16,7 @@ def writeToFile(resp, *args, **kwargs):
 	'''writes responses to file in order the requests are finished'''
 	newFile.write(resp.text.replace('\n',''))
 
-#Creates a list of headers) from CSV file containing headers
+#Creates a list of headers from CSV file containing headers
 #then converts this list to JSON.
 with open(headersFile, encoding='utf-8-sig') as f:
     reader = csv.reader(f)
