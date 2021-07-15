@@ -9,7 +9,7 @@ headersFile = 'pokerstars_headers.csv'
 newFile = 'pokerstars_data.csv'
 table = 'pokerstars'
 
-import pyodbc, csv, requests, json, requests
+import pyodbc, csv, requests, json
 from requests_futures.sessions import FuturesSession
 import time
 from datetime import timedelta
