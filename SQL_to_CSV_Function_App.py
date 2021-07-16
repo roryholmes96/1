@@ -1,9 +1,11 @@
 import logging
 import azure.functions as func
 import pyodbc, io, csv, json
+import time
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python SQL to CSV HTTP trigger function processed a request.')
+    s=time.time()
 
     table = req.params.get('table')
     firstRow = req.params.get('firstRow')
@@ -55,7 +57,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
         logging.info(f'Data converted to CSV format and being returned.')
 
-        return func.HttpResponse(output.getvalue())
+        csvString = output.getvalue()
+        e=time.time()
+        timeTaken = (e-s)
+        x = [csvString, timeTaken]
+        x = json.dumps(x)
+        return func.HttpResponse(x)
 
     else:
         return func.HttpResponse(
