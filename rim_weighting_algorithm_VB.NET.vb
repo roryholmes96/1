@@ -37,33 +37,23 @@ Module RimWeightingAlgorithm
         Return responseIndexes
     End Function
 
-    Function zip(ParamArray lists())
-        'iterates over multiple lists, combines items in current position of
-        'each list  into a string, which is then added to a new list.
-        'e.g. if list1 = (1, 2, 3) and list2 = ("a", "b", "c"). zippedLists
-        ' = ("1a", "2b", "3c")
-        Dim zippedLists As New ArrayList
-        For i = 0 To lists(0).count - 1
-            Dim lstCombination = ""
-
-            For Each lst In lists
-                lstCombination += CStr(lst(i))
-            Next
-
-            zippedLists.Add(lstCombination)
-        Next
-
-        Return zippedLists
-    End Function
-
-    Function crosstab(ParamArray responses())
+    Function crosstab(ParamArray responsesLists())
         'Crosstabs the lists of responses for multiple survey variables. The
         'crosstab is a dictionary in which there is a key for each possible 
         'combination of responses, with the frequency of respondents who responded
         'in that combination as the value
-        Dim zippedResponses = zip(responses)
+        Dim combinedResponsesLists As New ArrayList
+        For i = 0 To responsesLists(0).count - 1
+            Dim combinedResponses = ""
 
-        Return calcFrequencies(zippedResponses)
+            For Each lst In responsesLists
+                combinedResponses += CStr(lst(i))
+            Next
+
+            combinedResponsesLists.Add(combinedResponses)
+        Next
+
+        Return calcFrequencies(combinedResponsesLists)
     End Function
 
 
