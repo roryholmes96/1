@@ -21,6 +21,7 @@ Module RimWeightingAlgorithm
 
         Return frequencies
     End Function
+
     Function calcResponseIndexes(frequencies As SortedDictionary(Of String, Double))
         'calcs the index for each possible response in the given set of responses for
         'a response variable (i.e. enumerates them). e.g. if the possible responses
@@ -55,7 +56,6 @@ Module RimWeightingAlgorithm
 
         Return calcFrequencies(combinedResponsesLists)
     End Function
-
 
     Function aggregateCrosstabFrequencies(crosstabIndex, currentCrosstab)
         'Aggregates the frequencies of responses for each survey variable in
