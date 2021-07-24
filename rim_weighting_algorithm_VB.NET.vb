@@ -314,7 +314,7 @@ Module RimWeightingAlgorithm
         Console.WriteLine(String.Format("{0}Results in the format:", vbCrLf))
 
         For i = 0 To rimVariables.count - 1
-            Console.Write(String.Format("{0}=response&", rimVariables(i).header))
+            Console.Write(String.Format("{0}response&", rimVariables(i).header))
         Next
 
         Console.WriteLine(String.Format(": weight{0}", vbCrLf))
@@ -336,13 +336,17 @@ Module RimWeightingAlgorithm
 
         Dim rimVariables As New List(Of Object)
 
-        Dim header1 = "QS2"
+        Dim header1 = "QS2="
         Dim desiredFrequencies1 As New SortedDictionary(Of String, Double) From {{"QS2=1", 300}, {"QS2=2", 232}}
         rimVariables.Add(New RimVariable(header1, desiredFrequencies1))
 
-        Dim header2 = "QS4"
-        Dim desiredFrequencies2 As New SortedDictionary(Of String, Double) From {{"QS4=79", 26}, {"QS4=80", 65}, {"QS4=81", 55}, {"QS4=82", 45}, {"QS4=83", 29}, {"QS4=84", 30}, {"QS4=85", 40}, {"QS4=86", 87}, {"QS4=87", 66}, {"QS4=88", 58}, {"QS4=89", 15}, {"QS4=90", 16}}
+        Dim header2 = "QS3="
+        Dim desiredFrequencies2 As New SortedDictionary(Of String, Double) From {{"QS3=1", 53}, {"QS3=2", 88}, {"QS3=3", 126}, {"QS3=4", 95}, {"QS3=5", 170}}
         rimVariables.Add(New RimVariable(header2, desiredFrequencies2))
+
+        Dim header3 = "QS4="
+        Dim desiredFrequencies3 As New SortedDictionary(Of String, Double) From {{"QS4=79", 26}, {"QS4=80", 65}, {"QS4=81", 55}, {"QS4=82", 45}, {"QS4=83", 29}, {"QS4=84", 30}, {"QS4=85", 40}, {"QS4=86", 87}, {"QS4=87", 66}, {"QS4=88", 58}, {"QS4=89", 15}, {"QS4=90", 16}}
+        rimVariables.Add(New RimVariable(header3, desiredFrequencies3))
 
         CalculateRimWeights(server, database, table, column, rimVariables)
     End Sub
