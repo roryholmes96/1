@@ -10,7 +10,8 @@ Module RimWeightingAlgorithm
         'Create a Connection object.
         myConn = New SqlConnection(String.Format("Server = {0}; 
                                     Database = {1}; 
-                                    Integrated Security = true", server, database))
+                                    Integrated Security = true", 
+                                    server, database))
 
         'Create a Command object.
         myCmd = myConn.CreateCommand
@@ -282,7 +283,8 @@ Module RimWeightingAlgorithm
 
             Next
             totalDiffPerCase += diffPerCase(rimVariable.CurrentFrequencies,
-                                            rimVariable.DesiredFrequencies, actualCrosstab)
+                                            rimVariable.DesiredFrequencies,
+                                            actualCrosstab)
         Next
 
         'RIM-Weighting Algorithm
