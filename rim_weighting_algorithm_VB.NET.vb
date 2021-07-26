@@ -49,8 +49,8 @@ Module RimWeightingAlgorithm
     End Function
 
     Function calcResponseIndexes(frequencies As SortedDictionary(Of String, Double))
-        'calculates s the index for each possible response in the given set of responses
-        'for a response variable (i.e. enumerates them). e.g. if the possible responses
+        'Calculates the index for each possible response in the given set of responses
+        'for a survey variable (i.e. enumerates them). e.g. if the possible responses
         'for a variable are 78, 79, 81, 84, this function will return a dictionary in the
         'format ([78, 0], [79, 1], [81, 2], [84, 3]).
         Dim curIndex = 0
@@ -118,7 +118,8 @@ Module RimWeightingAlgorithm
         Return frequencies
     End Function
 
-    Function frequenciesDiff(currentFrequencies As SortedDictionary(Of String, Double), DesiredFrequencies As SortedDictionary(Of String, Double))
+    Function frequenciesDiff(currentFrequencies As SortedDictionary(Of String, Double),
+                             DesiredFrequencies As SortedDictionary(Of String, Double))
         'Calculates the difference between current frequencies (i.e. the 
         'frequencies after current iteration of weighting) and desired frequencies 
         'for each possible response in a survey variable's responses.
@@ -131,7 +132,9 @@ Module RimWeightingAlgorithm
         Return totalDiff
     End Function
 
-    Function diffPerCase(currentFrequencies As SortedDictionary(Of String, Double), desiredFrequencies As SortedDictionary(Of String, Double), actualCrosstab As SortedDictionary(Of String, Double))
+    Function diffPerCase(currentFrequencies As SortedDictionary(Of String, Double),
+                         desiredFrequencies As SortedDictionary(Of String, Double),
+                         actualCrosstab As SortedDictionary(Of String, Double))
         'Calculates the total difference between current and desired frequencies 
         'for a given survey variable, divided by the number of respondents 
         '(this is used to check whether to perform another iteration).
@@ -145,7 +148,8 @@ Module RimWeightingAlgorithm
         Return diff / sampleSize
     End Function
 
-    Function calcWeights(currentFrequencies As SortedDictionary(Of String, Double), desiredFrequencies As SortedDictionary(Of String, Double))
+    Function calcWeights(currentFrequencies As SortedDictionary(Of String, Double),
+                         desiredFrequencies As SortedDictionary(Of String, Double))
         'Calculates weights as desiredFrequencies/currentFrequencies quotient
         Dim weights As New ArrayList
 
@@ -205,7 +209,7 @@ Module RimWeightingAlgorithm
 
     Sub CalculateRimWeights(server, database, table, column, rimVariables)
 
-        'Retrieves all Data from Database.
+        'Retrieves all data from Database.
         Dim allData = RetrieveData(server, database, table, column)
 
         'Creates a dictionary for the required data in the form
@@ -246,7 +250,7 @@ Module RimWeightingAlgorithm
         'CurrentFrequencies, and ResponseIndexes.
 
         'Responses is the set of response data for a given variable (this is the same list
-        'as found in the key for the variable in the requiredData dicitionary.
+        'as found in the key for the variable in the requiredData dicitionary).
 
         'ActualFrequencies is the actual frequencies for each possible response for a given variable,
         'as recorded in data collection
@@ -277,7 +281,8 @@ Module RimWeightingAlgorithm
             For Each i In rimVariable.CurrentFrequencies
 
             Next
-            totalDiffPerCase += diffPerCase(rimVariable.CurrentFrequencies, rimVariable.DesiredFrequencies, actualCrosstab)
+            totalDiffPerCase += diffPerCase(rimVariable.CurrentFrequencies,
+                                            rimVariable.DesiredFrequencies, actualCrosstab)
         Next
 
         'RIM-Weighting Algorithm
@@ -287,18 +292,26 @@ Module RimWeightingAlgorithm
 
             'Calculates and applies weights to crosstab frequencies
             For Each rimVariable In rimVariables
-                Dim weights = calcWeights(rimVariable.CurrentFrequencies, rimVariable.desiredFrequencies)
-                applyweights(rimVariable.header, rimVariable.ResponseIndexes, currentCrosstab, weights)
+                Dim weights = calcWeights(rimVariable.CurrentFrequencies,
+                                          rimVariable.DesiredFrequencies)
+
+                applyweights(rimVariable.header,
+                             rimVariable.ResponseIndexes,
+                             currentCrosstab,
+                             weights)
 
                 'Updates current frequencies to refelct newly weighted crosstab frequencies
                 For Each _rimVariable In rimVariables
-                    _rimVariable.currentFrequencies = aggregateCrosstabFrequencies(_rimVariable.header, currentCrosstab)
+                    _rimVariable.currentFrequencies =
+                        aggregateCrosstabFrequencies(_rimVariable.header, currentCrosstab)
                 Next
             Next
 
             'Calculates total difference per case at end of iteration
             For Each rimVariable In rimVariables
-                totalDiffPerCase += diffPerCase(rimVariable.CurrentFrequencies, rimVariable.DesiredFrequencies, actualCrosstab)
+                totalDiffPerCase += diffPerCase(rimVariable.CurrentFrequencies,
+                                                rimVariable.DesiredFrequencies,
+                                                actualCrosstab)
             Next
 
             'Increases iteration and prints current iteration and diff per case
