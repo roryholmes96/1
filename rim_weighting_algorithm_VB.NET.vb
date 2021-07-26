@@ -5,6 +5,7 @@ Module RimWeightingAlgorithm
     Private myCmd As SqlCommand
     Private myReader As SqlDataReader
     Private results As String
+
     Function RetrieveData(server, database, table, column)
         'Create a Connection object.
         myConn = New SqlConnection(String.Format("Server = {0}; 
@@ -15,7 +16,7 @@ Module RimWeightingAlgorithm
         myCmd = myConn.CreateCommand
         myCmd.CommandText = String.Format("SELECT * FROM {0}", table)
 
-        'Open the connection and retieves data.
+        'Open the connection and retrieves data.
         myConn.Open()
         myReader = myCmd.ExecuteReader()
 
@@ -48,10 +49,10 @@ Module RimWeightingAlgorithm
     End Function
 
     Function calcResponseIndexes(frequencies As SortedDictionary(Of String, Double))
-        'calcs the index for each possible response in the given set of responses for
-        'a response variable (i.e. enumerates them). e.g. if the possible responses
+        'calculates s the index for each possible response in the given set of responses
+        'for a response variable (i.e. enumerates them). e.g. if the possible responses
         'for a variable are 78, 79, 81, 84, this function will return a dictionary in the
-        'format ([78, 0], [79, 1], [81, 2], [84, 3])
+        'format ([78, 0], [79, 1], [81, 2], [84, 3]).
         Dim curIndex = 0
         Dim responseIndexes As New SortedDictionary(Of String, Integer)
 
@@ -69,9 +70,9 @@ Module RimWeightingAlgorithm
         'The crosstab is a dictionary in which there is a key for each possible 
         'combination of responses, with the frequency of respondents who responded
         'in that combination as the value.
-        'e.g. (["QS0=1&QS2=1&", 46], ["QS0=1&QS2=2", 32])
-        'the "&" is used as a delimiter so that the variable response can be identified
-        'when aggregating freqeuncies and applying weights
+        'e.g. (["QS0=1&QS2=1&", 46], ["QS0=1&QS2=2", 32]).
+        'The "&" is used as a delimiter so that the variable response can be identified
+        'when aggregating frequencies and applying weights
         Dim combinedResponsesLists As New ArrayList
         For i = 0 To requiredData.Values(0).Count - 1
             Dim combinedResponses = ""
@@ -85,10 +86,11 @@ Module RimWeightingAlgorithm
 
         Return calcFrequencies(combinedResponsesLists)
     End Function
+
     Function getVariableResponseFromCrosstab(header, crosstabPair)
-        'gets the value of a response for a given variable from the key
+        'Gets the value of a response for a given variable from the key
         'in a given key:value pair in the crosstab, by using the variable
-        'header and the next "&" as delimiters
+        'header and the next "&" as delimiters.
         Dim startIndex = crosstabPair.Key.IndexOf(header)
         Dim endIndex = crosstabPair.Key.IndexOf("&", startIndex)
         Dim substringLen = endIndex - startIndex
@@ -118,8 +120,8 @@ Module RimWeightingAlgorithm
 
     Function frequenciesDiff(currentFrequencies As SortedDictionary(Of String, Double), DesiredFrequencies As SortedDictionary(Of String, Double))
         'Calculates the difference between current frequencies (i.e. the 
-        'frequencies after current iteration of weighting) And desired frequencies 
-        'for aach possible response in a survey variable's responses.
+        'frequencies after current iteration of weighting) and desired frequencies 
+        'for each possible response in a survey variable's responses.
         Dim totalDiff As Double
 
         For Each key In currentFrequencies.Keys
@@ -130,7 +132,7 @@ Module RimWeightingAlgorithm
     End Function
 
     Function diffPerCase(currentFrequencies As SortedDictionary(Of String, Double), desiredFrequencies As SortedDictionary(Of String, Double), actualCrosstab As SortedDictionary(Of String, Double))
-        'Calculates the total difference between current And desired frequencies 
+        'Calculates the total difference between current and desired frequencies 
         'for a given survey variable, divided by the number of respondents 
         '(this is used to check whether to perform another iteration).
         Dim diff = frequenciesDiff(currentFrequencies, desiredFrequencies)
@@ -240,10 +242,6 @@ Module RimWeightingAlgorithm
             Next
         Next
 
-        'Assigns actual And an initial current crosstab 
-        Dim actualCrosstab As SortedDictionary(Of String, Double) = crosstab(requiredData)
-        Dim currentCrosstab As SortedDictionary(Of String, Double) = crosstab(requiredData)
-
         'Updates each instance of rimVariable class by adding attributes Responses, ActualFrequencies
         'CurrentFrequencies, and ResponseIndexes.
 
@@ -255,12 +253,12 @@ Module RimWeightingAlgorithm
 
         'CurrentFrequencies is the frequencies during the current iteration of the rim-weighting algorithm
         'i.e. after some weights have been applied. This is initially the same as actual frequencies, but
-        'is updated as the rim-weighting algorithm is running
+        'is updated as the rim-weighting algorithm is running.
 
         'ResponseIndexes is a dictionary of possible responses as keys and their index as a value.
         ' i.e. if the set of possible responses for a variable (e.g. region) are 78, 79, 82, 90
         'ResponseIndexes will be (["78", 0], ["79", 1], ["82", 2], ["90", 3])
-        'These are utilised in the rim_weighting algorithm for selecting the correct data to apply the weights to
+        'These are utilised in the rim_weighting algorithm for selecting the correct data to apply the weights to.
         For Each rimVariable In rimVariables
             rimVariable.Responses = requiredData(rimVariable.header)
             rimVariable.ActualFrequencies = calcFrequencies(rimVariable.Responses)
@@ -268,8 +266,12 @@ Module RimWeightingAlgorithm
             rimVariable.ResponseIndexes = calcResponseIndexes(rimVariable.ActualFrequencies)
         Next
 
+        'Assigns actual and an initial current crosstab 
+        Dim actualCrosstab As SortedDictionary(Of String, Double) = crosstab(requiredData)
+        Dim currentCrosstab As SortedDictionary(Of String, Double) = crosstab(requiredData)
+
         'Assigns initial total difference between actual and desired freq per case for
-        'all survey variables. i.e. the sum of the totalDiffPerCase fo each survey variable
+        'all survey variables. i.e. the sum of the totalDiffPerCase fo each survey variable.
         Dim totalDiffPerCase = 0.0
         For Each rimVariable In rimVariables
             For Each i In rimVariable.CurrentFrequencies
@@ -280,7 +282,7 @@ Module RimWeightingAlgorithm
 
         'RIM-Weighting Algorithm
         Dim iteration = 0
-        While totalDiffPerCase > 0.0000000000000001 And iteration < 50
+        While totalDiffPerCase > 0.000000000000001 And iteration < 50
             totalDiffPerCase = 0.0
 
             'Calculates and applies weights to crosstab frequencies
@@ -328,14 +330,16 @@ Module RimWeightingAlgorithm
     End Sub
 
     Sub Main()
+        'List containing all instances of the RimVariable object
+        Dim rimVariables As New List(Of Object)
 
+        'Enter database info here
         Dim server = ".\sqlexpress"
         Dim database = "Pokerstars"
         Dim table = "pokerstars"
         Dim column = 0
 
-        Dim rimVariables As New List(Of Object)
-
+        'Enter header and desired frequency info here
         Dim header1 = "QS2="
         Dim desiredFrequencies1 As New SortedDictionary(Of String, Double) From {{"QS2=1", 300}, {"QS2=2", 232}}
         rimVariables.Add(New RimVariable(header1, desiredFrequencies1))
